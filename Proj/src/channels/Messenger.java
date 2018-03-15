@@ -19,9 +19,10 @@ public class Messenger {
 
 	private InetAddress server_group;
 	private MulticastSocket mc_socket;
+	private InetAddress localPeerIP;
 
 	// TODO call this with all channel addrs and ports
-	public Messenger() throws Exception {
+	public Messenger(InetAddress localPeerIP) throws Exception {
 		buffer = new byte[1024];
 		cin = new BufferedReader(new InputStreamReader(System.in));
 
@@ -29,8 +30,9 @@ public class Messenger {
 
 		mc_socket = new MulticastSocket(PeerService.default_MCport);
 		mc_socket.joinGroup(server_group);
-
-		System.out.println("MESSENGER CONNECTED INTO " + server_group + ":" + PeerService.default_MCport);
+		this.localPeerIP = localPeerIP;
+		
+		System.out.println("MESSENGER USER " + localPeerIP + " CONNECTED INTO " + server_group + ":" + PeerService.default_MCport);
 		openDialogue();
 	}
 

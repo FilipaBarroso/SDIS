@@ -32,12 +32,12 @@ public class PeerService {
 		
 		
 		//	Multicast Channels threads
-		mcThread = new MC(InetAddress.getByName(defaultServer), default_MCport);
+		mcThread = new MC(InetAddress.getByName(defaultServer), default_MCport, localPeer.get_ip());
 		new Thread(mcThread).start();
 		//  new Thread(mdbThread).start();
 		//	new Thread(mdrThread).start();
 
-		Messenger messenger = new Messenger();
+		Messenger messenger = new Messenger(localPeer.get_ip());
 	}
 	
 }
