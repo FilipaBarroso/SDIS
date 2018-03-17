@@ -7,6 +7,7 @@ import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 
+import service.Peer;
 import service.PeerService;
 
 /*
@@ -17,28 +18,25 @@ public class Messenger {
 	private byte[] buffer;
 	private BufferedReader cin;
 
-	private InetAddress server_group;
-	private MulticastSocket mc_socket;
-	private InetAddress localPeerIP;
+	private MulticastSocket socket;
+	private Peer localPeer;
+	private InetAddress server;
 
 	// TODO call this with all channel addrs and ports
-	public Messenger(InetAddress localPeerIP) throws Exception {
+	public Messenger(MulticastSocket socket, Peer localPeer, InetAddress server) throws Exception {
 		buffer = new byte[1024];
 		cin = new BufferedReader(new InputStreamReader(System.in));
 
-		server_group = InetAddress.getByName(PeerService.defaultServer);
+		this.socket = socket;
+		this.server = server;
 
-		mc_socket = new MulticastSocket(PeerService.default_MCport);
-		mc_socket.joinGroup(server_group);
-		this.localPeerIP = localPeerIP;
-		
-		System.out.println("MESSENGER USER " + localPeerIP + " CONNECTED INTO " + server_group + ":" + PeerService.default_MCport);
+		System.out.println("MESSENGER: LOGIN FROM PEER " + localPeer.get_ip() + " : " + localPeer.get_port() + "\n");
+
 		openDialogue();
 	}
 
 	public void openDialogue() throws Exception {
 		while(true) { try {
-			System.out.println("Send a msg to peers:\n");
 
 			String s = (String)cin.readLine();
 			byte[] msg_data = s.getBytes();
@@ -53,8 +51,8 @@ public class Messenger {
 
 	// por agora assumir q so ha um canal
 	public void sendMessage(byte[] msg) throws Exception {
-		DatagramPacket packet = new DatagramPacket(msg, msg.length, server_group, PeerService.default_MCport);
-		mc_socket.send(packet);
+		DatagramPacket mc_packet = new DatagramPacket(msg, msg.length, server, PeerService.default_MCport);
+		socket.send(mc_packet);
 
 		openDialogue();
 	}

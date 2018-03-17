@@ -5,9 +5,11 @@ import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 
+import service.Peer;
+import service.PeerService;
+
 /*
  * Stores info related to the control channel
- * Calls a MsgHandler thread 
  */
 public class MC extends MulticastChannel implements Runnable {
 
@@ -27,25 +29,32 @@ public class MC extends MulticastChannel implements Runnable {
 	}
 
 	public void run() {
-		System.out.println("MC THREAD BOOTED IN " + getIp() + ":" + getPort() + "\n");
-
+		System.out.println("MC: THREAD BOOTED IN " + getIp() + ":" + getPort());
+		
 		while(true) {
 			try {
-				System.out.println("MC: Reading packets\n");
 				socket.receive(packet);
-				System.out.println("MESSAGED BY: " + packet.getAddress());
+				
+				Peer sender = new Peer(packet.getAddress(), packet.getPort());
+				
+				// prints for debugging purposes
+				//System.out.println("MC: sender\t" + sender.get_ip() + " : " + sender.get_port());
+				//System.out.println("MC: local\t" + PeerService.getLocalPeer().get_ip() + " : " + PeerService.getLocalPeer().get_port());
+				
+				if(sender.same(PeerService.getLocalPeer())) {
+					//System.out.println("\nMC: Blocked message coming from the same peer");
+					continue;
+				}
+				
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			if(packet.getAddress() == localPeerIP) {
-				System.out.println("Testing: Rejected message coming from same IP");
-				continue;
-			}
+			
 			buffer = packet.getData();
 			String s = new String(buffer, 0, packet.getLength());
 
-			System.out.println("Received msg from peer: "+ s);
+			System.out.println("\nMC:"+ s + "\n");
 		}
 	}
 }

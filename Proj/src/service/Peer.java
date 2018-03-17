@@ -27,12 +27,12 @@ public class Peer {
 		this.port = port;
 	}
 	
-	public boolean equals(Object obj) {
+	public boolean same(Object obj) {		
 		if(obj == null || getClass() != obj.getClass()) return false;
 		
 		Peer peerObj = (Peer)obj;
 		
-		if(peerObj.get_ip() != ip || peerObj.get_port() != port) return false;
+		if(!peerObj.get_ip().equals(ip) || peerObj.get_port() != port) return false;
 		
 		return true;
 	}

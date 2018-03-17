@@ -25,7 +25,7 @@ public class PeerService {
 
 	public static void main(String args[]) throws Exception {
 		// check whether args are empty or there's channel configs / a command 
-		System.out.println("STARTED PEER SERVICE \n\n");
+		System.out.println("STARTED PEER SERVICE \n");
 		
 		socket = new MulticastSocket();
 		localPeer = new Peer(Utils.getPeerAddr(), socket.getLocalPort());
@@ -37,7 +37,15 @@ public class PeerService {
 		//  new Thread(mdbThread).start();
 		//	new Thread(mdrThread).start();
 
-		Messenger messenger = new Messenger(localPeer.get_ip());
+		Messenger messenger = new Messenger(socket, localPeer, InetAddress.getByName(defaultServer));
+	}
+	
+	public static Peer getLocalPeer() {
+		return localPeer;
+	}
+	
+	public static MulticastSocket getSocket() {
+		return socket;
 	}
 	
 }
