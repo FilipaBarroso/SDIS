@@ -17,7 +17,6 @@ public class Messenger {
 
 	private byte[] buffer;
 	private BufferedReader cin;
-
 	private MulticastSocket socket;
 	private Peer localPeer;
 	private InetAddress server;
@@ -30,7 +29,7 @@ public class Messenger {
 		this.socket = socket;
 		this.server = server;
 
-		System.out.println("MESSENGER: LOGIN FROM PEER " + localPeer.get_ip() + " : " + localPeer.get_port() + "\n");
+		System.out.println("MESSENGER: LOGIN FROM PEER " + localPeer.get_ip() + ":" + localPeer.get_port() + "\n");
 
 		openDialogue();
 	}
@@ -40,7 +39,7 @@ public class Messenger {
 
 			String s = (String)cin.readLine();
 			byte[] msg_data = s.getBytes();
-			sendMessage(msg_data);
+			sendToMC(msg_data);
 		}
 		catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -49,11 +48,17 @@ public class Messenger {
 		}
 	}
 
-	// por agora assumir q so ha um canal
-	public void sendMessage(byte[] msg) throws Exception {
+	public void sendToMC(byte[] msg) throws Exception {
 		DatagramPacket mc_packet = new DatagramPacket(msg, msg.length, server, PeerService.default_MCport);
 		socket.send(mc_packet);
 
 		openDialogue();
 	}
+	
+	public void sendToMDB(byte[] msg) throws Exception {
+		DatagramPacket mdb_packet = new DatagramPacket(msg, msg.length, server, PeerService.default_MDBport);
+		socket.send(mdb_packet);
+
+		openDialogue();
+	}	
 }
