@@ -14,13 +14,13 @@ import service.PeerService;
 /*
  * Formats and sends messages
  */
-public class Messenger {
+public class Messenger implements Runnable {
 
-	private byte[] buffer;
-	private BufferedReader cin;
-	private MulticastSocket socket;
-	private Peer localPeer;
-	private InetAddress server;
+	private static byte[] buffer;
+	private static BufferedReader cin;
+	private static MulticastSocket socket;
+	private static Peer localPeer;
+	private static InetAddress server;
 
 	// TODO call this with all channel addrs and ports
 	public Messenger(MulticastSocket socket, Peer localPeer, InetAddress server) throws Exception {
@@ -31,12 +31,10 @@ public class Messenger {
 		this.server = server;
 
 		System.out.println("MESSENGER: LOGIN FROM PEER " + localPeer.get_ip() + ":" + localPeer.get_port() + "\n");
-		System.out.println("MSN: VALID OPERATIONS: backup\t");
-		
-		openDialogue();
+		System.out.println("VALID OPERATIONS: backup\t");
 	}
 
-	public void openDialogue() throws Exception {
+	public void run() {
 		while(true) { try {
 
 			String s = (String)cin.readLine();
@@ -60,12 +58,12 @@ public class Messenger {
 		}
 	}
 
-	public void handleBackupMsg() {
+	public static void handleBackupMsg() {
 		try {
 			String filename;
 			int repD;
 		
-			System.out.println("MSN: Specify backup <filename replicationDegree>");
+			System.out.println("MESSENGER: Specify backup <filename replicationDegree>");
 			String s = (String)cin.readLine();
 			String[] tokens = s.split("\\s+");
 			
@@ -81,7 +79,7 @@ public class Messenger {
 		
 	}
 	
-	public int decypherConsole(String s) {
+	public static int decypherConsole(String s) {
 		if(s.equals("backup")) return 1;
 		if(s.equals("restore")) return 2;
 		if(s.equals("delete")) return 3;
@@ -90,17 +88,13 @@ public class Messenger {
 		return 0;
 	}
 	
-	public void sendToMC(byte[] msg) throws Exception {
+	public static void sendToMC(byte[] msg) throws Exception {
 		DatagramPacket mc_packet = new DatagramPacket(msg, msg.length, server, PeerService.default_MCport);
 		socket.send(mc_packet);
-
-		openDialogue();
 	}
 	
-	public void sendToMDB(byte[] msg) throws Exception {
+	public static void sendToMDB(byte[] msg) throws Exception {
 		DatagramPacket mdb_packet = new DatagramPacket(msg, msg.length, server, PeerService.default_MDBport);
 		socket.send(mdb_packet);
-
-		openDialogue();
-	}	
+	}
 }

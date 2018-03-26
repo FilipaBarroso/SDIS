@@ -41,6 +41,7 @@ public class PeerService {
 		//	new Thread(mdrThread).start();
 
 		Messenger messenger = new Messenger(socket, localPeer, InetAddress.getByName(defaultServer));
+		new Thread(messenger).start();
 	}
 
 	public static Peer getLocalPeer() {

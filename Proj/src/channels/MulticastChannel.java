@@ -5,7 +5,7 @@ import java.net.InetAddress;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 
-public class MulticastChannel {
+public abstract class MulticastChannel {
 
 	private InetAddress ip;
 	private int port;

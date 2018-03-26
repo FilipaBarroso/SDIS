@@ -5,9 +5,11 @@ import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 
-import Protocol.Protocol;
+import service.Chunk;
 import service.Peer;
 import service.PeerService;
+import Protocol.MsgHandler;
+import Protocol.Protocol;
 
 public class MDB extends MulticastChannel implements Runnable {
 
@@ -20,7 +22,7 @@ public class MDB extends MulticastChannel implements Runnable {
 		super(ip, port);
 
 		this.localPeerIP = localPeerIP;
-		buffer = new byte[1024];
+		buffer = new byte[Protocol.MAX_BUFFER];
 		socket = new MulticastSocket(port);
 		socket.joinGroup(getIp());
 		packet = new DatagramPacket(buffer, buffer.length);
@@ -31,9 +33,7 @@ public class MDB extends MulticastChannel implements Runnable {
 
 		while(true) {
 			try {
-				// ignorar packets que nao sejam PUTCHUNK
 				socket.receive(packet);
-				// Protocol.decypherMsg(packet.getData());
 				
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
@@ -50,5 +50,29 @@ public class MDB extends MulticastChannel implements Runnable {
 		}
 	}
 
-
+	/*
+	 * cria o chunk da msg e guarda-o na pasta CHUNKS\FILENAME
+	 * verificar se a pasta ja existe
+	 * guardar o chunk na Database 
+	 */
+	public static void handlePUTCHUNK(byte[] msg) {
+		// ver se ainda nao existe na DB
+		
+		try {
+			byte[] body = MsgHandler.extractBody(msg);
+			String[] msg_tokens = MsgHandler.msgTokens;
+			
+			Chunk chunk = new Chunk(msg_tokens[3], Integer.parseInt(msg_tokens[4]), Integer.parseInt(msg_tokens[5]), body);
+			
+			Protocol.storeChunk(chunk);
+			
+			// Protocol.sendSTORED to MC
+			
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 }

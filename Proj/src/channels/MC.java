@@ -7,6 +7,7 @@ import java.net.MulticastSocket;
 
 import service.Peer;
 import service.PeerService;
+import Protocol.Protocol;
 
 /*
  * Stores info related to the control channel
@@ -22,7 +23,7 @@ public class MC extends MulticastChannel implements Runnable {
 		super(ip, port);
 
 		this.localPeerIP = localPeerIP;
-		buffer = new byte[1024];
+		buffer = new byte[Protocol.MAX_BUFFER];
 		socket = new MulticastSocket(port);
 		socket.joinGroup(getIp());
 		packet = new DatagramPacket(buffer, buffer.length);

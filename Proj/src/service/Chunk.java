@@ -5,7 +5,7 @@ package service;
  */
 public class Chunk {
 	
-	public static int MAX_SIZE = 64;
+	public static int MAX_SIZE = 6400;
 	String fileID;
 	int chunkNo;
 	int repD;
@@ -20,4 +20,5 @@ public class Chunk {
 	
 	public int getNo() {return chunkNo;}
 	public byte[] getData() {return data;}
+	public int getRepD() {return repD;}
 }

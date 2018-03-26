@@ -29,7 +29,7 @@ public class Backup implements Runnable {
 			chunkArray = getChunks(file);
 
 			backupChunks(chunkArray);
-		} catch (FileNotFoundException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
@@ -72,14 +72,17 @@ public class Backup implements Runnable {
 		return chunkArray;
 	}
 
-	public void backupChunks(Chunk[] chunkArray) throws FileNotFoundException {
+	public void backupChunks(Chunk[] chunkArray) throws Exception {
 		// send PUTCHUNKs 
 		
+		Protocol.sendPUTCHUNKS(chunkArray, fileID);
+		
+		// wait for STORED confirms
 		/**
 		 * temporario para testar
 		 * guardar os chunks localmente
 		 */
-		Protocol.loadChunks(chunkArray, this.file.getName());
+		//Protocol.loadChunks(chunkArray, this.file.getName());
 
 	}
 
