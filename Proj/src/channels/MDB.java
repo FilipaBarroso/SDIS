@@ -5,9 +5,9 @@ import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 
+import Protocol.Protocol;
 import service.Peer;
 import service.PeerService;
-import service.Protocol;
 
 public class MDB extends MulticastChannel implements Runnable {
 
@@ -31,7 +31,10 @@ public class MDB extends MulticastChannel implements Runnable {
 
 		while(true) {
 			try {
+				// ignorar packets que nao sejam PUTCHUNK
 				socket.receive(packet);
+				// Protocol.decypherMsg(packet.getData());
+				
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -40,8 +43,10 @@ public class MDB extends MulticastChannel implements Runnable {
 			Peer sender = new Peer(packet.getAddress(), packet.getPort());
 			if(sender.same(PeerService.getLocalPeer())) continue;
 			
-			Protocol.decypherMsg(packet.getData());
-			// if PUTCHUNK call Backup(file, repDegree)
+			buffer = packet.getData();
+			String s = new String(buffer, 0, packet.getLength());
+
+			System.out.println("\nMDB:"+ s + "\n");
 		}
 	}
 

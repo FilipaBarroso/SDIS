@@ -33,7 +33,9 @@ public class MC extends MulticastChannel implements Runnable {
 		
 		while(true) {
 			try {
+				// ignorar packets que nao sejam STORED e GETCHUNK
 				socket.receive(packet);
+				// Protocol.decypherMsg
 				
 				Peer sender = new Peer(packet.getAddress(), packet.getPort());
 				
@@ -41,10 +43,7 @@ public class MC extends MulticastChannel implements Runnable {
 				//System.out.println("MC: sender\t" + sender.get_ip() + " : " + sender.get_port());
 				//System.out.println("MC: local\t" + PeerService.getLocalPeer().get_ip() + " : " + PeerService.getLocalPeer().get_port());
 				
-				if(sender.same(PeerService.getLocalPeer())) {
-					//System.out.println("\nMC: Blocked message coming from the same peer");
-					continue;
-				}
+				if(sender.same(PeerService.getLocalPeer())) continue;
 				
 			} catch (IOException e) {
 				// TODO Auto-generated catch block

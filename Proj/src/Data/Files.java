@@ -6,12 +6,12 @@ import java.io.IOException;
 import java.security.MessageDigest;
 import java.io.FileInputStream;
 
+import Protocol.Protocol;
 import service.PeerService;
-import service.Protocol;
 
 public class Files {
 
-	public String getFileID(File file) {
+	public static String getFileID(File file) {
 		String file_metadata = file.getName() + file.lastModified() + PeerService.getLocalPeer().toString();
 
 		return getSha256(file_metadata);

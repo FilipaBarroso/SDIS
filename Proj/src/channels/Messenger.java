@@ -7,6 +7,7 @@ import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 
+import Protocol.Protocol;
 import service.Peer;
 import service.PeerService;
 
@@ -30,7 +31,8 @@ public class Messenger {
 		this.server = server;
 
 		System.out.println("MESSENGER: LOGIN FROM PEER " + localPeer.get_ip() + ":" + localPeer.get_port() + "\n");
-
+		System.out.println("MSN: VALID OPERATIONS: backup\t");
+		
 		openDialogue();
 	}
 
@@ -39,7 +41,17 @@ public class Messenger {
 
 			String s = (String)cin.readLine();
 			byte[] msg_data = s.getBytes();
-			sendToMC(msg_data);
+			
+			// read the console and apply the desired protocol
+			int c = decypherConsole(s);
+			switch(c) {
+			case 1:
+				handleBackupMsg();
+				break;
+			default:
+				break;
+			}
+			
 		}
 		catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -48,6 +60,36 @@ public class Messenger {
 		}
 	}
 
+	public void handleBackupMsg() {
+		try {
+			String filename;
+			int repD;
+		
+			System.out.println("MSN: Specify backup <filename replicationDegree>");
+			String s = (String)cin.readLine();
+			String[] tokens = s.split("\\s+");
+			
+			filename = tokens[0];
+			repD = Integer.parseInt(tokens[1]);
+			
+			Protocol.initiateBackup(filename, repD);
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
+	
+	public int decypherConsole(String s) {
+		if(s.equals("backup")) return 1;
+		if(s.equals("restore")) return 2;
+		if(s.equals("delete")) return 3;
+		
+		
+		return 0;
+	}
+	
 	public void sendToMC(byte[] msg) throws Exception {
 		DatagramPacket mc_packet = new DatagramPacket(msg, msg.length, server, PeerService.default_MCport);
 		socket.send(mc_packet);
