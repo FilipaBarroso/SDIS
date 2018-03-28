@@ -7,7 +7,7 @@ import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 
-import Protocol.Protocol;
+import protocol.Protocol;
 import service.Peer;
 import service.PeerService;
 
@@ -30,8 +30,8 @@ public class Messenger implements Runnable {
 		this.socket = socket;
 		this.server = server;
 
-		System.out.println("MESSENGER: LOGIN FROM PEER " + localPeer.get_ip() + ":" + localPeer.get_port() + "\n");
-		System.out.println("VALID OPERATIONS: backup\t");
+		System.out.println("MESSENGER: Login from peer " + localPeer.get_ip() + ":" + localPeer.get_port());
+		System.out.println("MESSENGER: Valid Operations: backup\t");
 	}
 
 	public void run() {

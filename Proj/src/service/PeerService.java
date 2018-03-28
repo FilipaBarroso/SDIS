@@ -1,13 +1,13 @@
 package service;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.util.Random;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.ObjectOutputStream;
 
 import channels.MC;
 import channels.MDB;
@@ -20,11 +20,10 @@ public class PeerService {
 	private static MulticastSocket socket;
 	private static Peer localPeer;
 	private static Messenger messenger;
-	public static Random random = new Random();
-	
+
 	private static volatile Database database;
 	private static final String DATABASE_STRING = "database.data";
-
+	
 	private static volatile MC mcThread;
 	private static volatile MDB mdbThread;
 	private static volatile MDR mdrThread;
@@ -48,10 +47,9 @@ public class PeerService {
 		//	new Thread(mdrThread).start();
 
 		Messenger messenger = new Messenger(socket, localPeer, InetAddress.getByName(defaultServer));
-		//new Thread(messenger).start();
+		new Thread(messenger).start();
 		
-	
-		//loadDatabase();
+		// loadDatabase();
 	}
 
 	public static Peer getLocalPeer() {
@@ -82,7 +80,7 @@ public class PeerService {
 		return socket;
 	}
 	
-	
+
 	/*
 	 * database functions
 	 */
@@ -116,13 +114,12 @@ public class PeerService {
 		
 	}
 	
-	/*
-	 TO-DO:
+	/* TODO
 	 private static void loadDatabase(){
 		
-	}*/
+	}
+	*/
 	
-	
-	
+
 
 }

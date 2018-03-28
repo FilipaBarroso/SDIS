@@ -21,4 +21,5 @@ public class Chunk {
 	public int getNo() {return chunkNo;}
 	public byte[] getData() {return data;}
 	public int getRepD() {return repD;}
+	public String getFileID() {return fileID;}
 }

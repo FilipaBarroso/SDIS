@@ -1,8 +1,11 @@
 package service;
 
+import java.io.Serializable;
 import java.net.InetAddress;
+import java.util.Objects;
 
-public class Peer {
+public class Peer implements Serializable {
+	private static final long serialVersionUID = 3L;
 	private InetAddress ip;
 	private int port;
 	
@@ -37,4 +40,8 @@ public class Peer {
 		return true;
 	}
 	
+	@Override
+	public int hashCode() {
+		return Objects.hash(ip, port);
+	}
 }
