@@ -1,6 +1,9 @@
 package service;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
@@ -10,6 +13,7 @@ import channels.MC;
 import channels.MDB;
 import channels.MDR;
 import channels.Messenger;
+import database.Database;
 
 public class PeerService {
 
@@ -17,6 +21,9 @@ public class PeerService {
 	private static Peer localPeer;
 	private static Messenger messenger;
 	public static Random random = new Random();
+	
+	private static volatile Database database;
+	private static final String DATABASE_STRING = "database.data";
 
 	private static volatile MC mcThread;
 	private static volatile MDB mdbThread;
@@ -41,7 +48,10 @@ public class PeerService {
 		//	new Thread(mdrThread).start();
 
 		Messenger messenger = new Messenger(socket, localPeer, InetAddress.getByName(defaultServer));
-		new Thread(messenger).start();
+		//new Thread(messenger).start();
+		
+	
+		//loadDatabase();
 	}
 
 	public static Peer getLocalPeer() {
@@ -71,5 +81,48 @@ public class PeerService {
 	public static MulticastSocket getSocket() {
 		return socket;
 	}
+	
+	
+	/*
+	 * database functions
+	 */
+	
+	private static void createDatabase(){
+		database = new Database();
+		
+		saveDatabase();
+	}
+	
+	public static Database getDatabase() {
+		return database;
+	}
+	
+	public static void saveDatabase(){
+		try{
+			FileOutputStream fileOutputStream = new FileOutputStream(DATABASE_STRING);
+			ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
+			
+			objectOutputStream.writeObject(database);
+			
+			objectOutputStream.close();
+			
+		} catch (FileNotFoundException e){
+			createDatabase();
+			
+			e.printStackTrace();
+		} catch (IOException e){
+			e.printStackTrace();
+		}
+		
+	}
+	
+	/*
+	 TO-DO:
+	 private static void loadDatabase(){
+		
+	}*/
+	
+	
+	
 
 }
