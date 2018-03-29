@@ -10,12 +10,15 @@ import protocol.Protocol;
 
 import java.io.FileInputStream;
 
+import channels.MulticastChannel;
+import database.ChunkKey;
 import service.Chunk;
 import service.PeerService;
 
 public class Files {
 
 	public static String FILE_PATH = "FILES/";
+	public static String RESTORED_FILE_PATH = "RESTORED_FILES/";
 	public static String RESTORED_CHUNKS_PATH = "RESTORED_CHUNKS/";
 	public static String CHUNKS_PATH = "CHUNKS/";
 	
@@ -81,18 +84,34 @@ public class Files {
 		System.out.println("FILES: Chunks saved locally");
 	}
 	
-	public static boolean hasChunk(Chunk chunk) {
+	public static boolean hasChunk(ChunkKey chunk) {
 		File chunksFolder = new File(CHUNKS_PATH);
 		if(!chunksFolder.exists() || !chunksFolder.isDirectory())
 			chunksFolder.mkdir();
 		
-		File chunkFile = new File(CHUNKS_PATH + "/" + chunk.getFileID() + "-" + chunk.getNo());
+		File chunkFile = new File(CHUNKS_PATH + "/" + chunk.getFileID() + "-" + chunk.getChunkNo());
 		if(chunkFile.exists() && chunkFile.isFile()) {
 			System.out.println("FILES: Rejected a duplicate chunk");
 			return true;
 		}
 		
 		return false;
+	}
+	
+	public static Chunk getChunk(ChunkKey chunk) throws Exception {
+		File chunkFile = new File(CHUNKS_PATH + "/" + chunk.getFileID() + "-" + chunk.getChunkNo());
+		if(chunkFile.exists() && chunkFile.isFile()) {
+			FileInputStream instream = new FileInputStream(CHUNKS_PATH + "/" + chunk.getFileID() + "-" + chunk.getChunkNo());
+			
+			byte[] body = new byte[Protocol.MAX_BUFFER];
+			instream.read(body);
+			instream.close();
+			
+			Chunk tmp = new Chunk(chunk.getFileID(), chunk.getChunkNo(), 0, body);
+			return tmp;
+		}
+		
+		return null;
 	}
 	
 	public static void storeChunk(Chunk chunk) {
@@ -115,4 +134,7 @@ public class Files {
 		// update database
 		
 	}
+
+	// TODO
+	public static void convertChunks(Chunk[] chunkArray) {}
 }

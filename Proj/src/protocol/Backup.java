@@ -28,11 +28,6 @@ public class Backup implements Runnable {
 	}
 
 	public void run() {
-		if(PeerService.getDatabase().fileWasSaved(file.getName())) {
-			System.out.println("BACKUP: File already exists in the database");
-			return;
-		}
-		
 		Chunk[] chunkArray;
 		try {
 			chunkArray = getChunks(file);

@@ -10,6 +10,7 @@ import java.util.Random;
 
 import channels.MC;
 import channels.MDB;
+import channels.MDR;
 import channels.Messenger;
 import channels.MulticastChannel;
 import data.Files;
@@ -29,10 +30,13 @@ public class Protocol {
 		filename = Files.FILE_PATH + filename;
 		File file = new File(filename);
 
-		Backup backup = new Backup(file, repD);
-		new Thread(backup).start();
+		if(!PeerService.getDatabase().fileWasSaved(filename)) {
+			Backup backup = new Backup(file, repD);
+			new Thread(backup).start();
+		}
+		else System.out.println("PROTOCOL: File already exists in the server");
 	}
-	
+
 	public static void initiateRestore(String filename) {
 		filename = Files.FILE_PATH + filename;
 		File file = new File(filename);
@@ -42,8 +46,11 @@ public class Protocol {
 		if(!chunks.exists() || !chunks.isDirectory())
 			chunks.mkdir();
 
-		Restore restore = new Restore(file);
-		new Thread(restore).start();
+		if(PeerService.getDatabase().fileWasSaved(filename)) {
+			Restore restore = new Restore(file);
+			new Thread(restore).start();
+		}
+		else System.out.println("PROTOCOL: File doesn't exist in the server");
 	}	
 
 	public static void sendPUTCHUNK(Chunk chunk, ChunkKey ck) throws Exception {
@@ -62,35 +69,31 @@ public class Protocol {
 
 		System.out.println("PROTOCOL: Sent a chunk to MDB");
 	}
-	
-	/*
-	 * verificar se o chunk ja existe
-	 * guardar o chunk na Database 
-	 */
+
 	public static void handlePUTCHUNK(byte[] msg, Peer sender) {
 		System.out.println("MDB: received a PUTCHUNK");
-		
+
 		try {
 			byte[] body = MulticastChannel.extractBody(msg);
 			String[] msg_tokens = MulticastChannel.msgTokens;
 			String fileID = msg_tokens[3];
 			int chunkNo = Integer.parseInt(msg_tokens[4]);
 			int repD = Integer.parseInt(msg_tokens[5]);
-			
+
 			// Chunk(fileID, chunkNo, repDegree, data)
 			Chunk chunk = new Chunk(fileID, chunkNo, repD, body);
 			ChunkKey ck = new ChunkKey(chunkNo, fileID);
-			
+
 			// if the peer already has this chunk, send STORED confirmation
-			if(Files.hasChunk(chunk)) {
+			if(Files.hasChunk(ck)) {
 				//System.out.println("MDB: already have this chunk");
 				Protocol.sendSTORED(sender, chunk);	
 			}
-			
+
 			// else wait between 0 and 400ms and send STORED confirmation if needed
 			else {
 				Thread.sleep(random.nextInt(399));
-				
+
 				if(MC.getNumStoredConfs(ck) < repD) {
 					Files.storeChunk(chunk);
 					Protocol.sendSTORED(PeerService.getLocalPeer(), chunk);
@@ -99,7 +102,7 @@ public class Protocol {
 
 				MC.deleteStoredConfs(ck);
 			}
-			
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -118,20 +121,20 @@ public class Protocol {
 
 		System.out.println("PROTOCOL: sent a STORED confirm to MC\n--------------------");
 	}
-	
+
 	public static void handleSTORED(byte[] msg, Peer sender) {
 		try {
 			byte[] body = MulticastChannel.extractBody(msg);
 			String[] msg_tokens = MulticastChannel.msgTokens;
-			
+
 			// ChunkKey(chunkNo, fileID)
 			ChunkKey chunkKey = new ChunkKey(Integer.parseInt(msg_tokens[4]), msg_tokens[3]);
-			
+
 			MC.addStoredConfirm(chunkKey, sender);
-			
+
 			// update chunk database
 			PeerService.getDatabase().addPeerToChunkPeerList(chunkKey, sender);
-			
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -139,26 +142,85 @@ public class Protocol {
 
 	public static void sendGETCHUNK(Peer sender, String fileID, int chunkNo) throws Exception {
 		System.out.println("PROTOCOL: asking for the file " + fileID);
-		
+
 		String header = "GETCHUNK" + " " + VERSION +
 				" " + sender.get_ip() +
 				" " + fileID +
 				" " + chunkNo +
 				" " + CRLF + CRLF;
-		
+
 		byte[] packet = MulticastChannel.readyPacket(header.getBytes(), "".getBytes());
 
 		Messenger.sendToMC(packet);
 
 		System.out.println("PROTOCOL: sent a GETCHUNK to MC");
 	}
-	
-	// TODO
-	public static void handleGETCHUNK(byte[] msg, Peer sender) {}
 
 	// TODO
-	public static void sendCHUNK() {}
+	public static void handleGETCHUNK(byte[] msg, Peer sender) {
+		System.out.println("MC: received a GETCHUNK");
+
+		try {
+			String[] msg_tokens = MulticastChannel.msgTokens;
+			String fileID = msg_tokens[3];
+			int chunkNo = Integer.parseInt(msg_tokens[4]);
+
+			// Chunk(fileID, chunkNo, repDegree, data)
+			ChunkKey ck = new ChunkKey(chunkNo, fileID);
+
+			// if the peer doesn't have this chunk then it ignores the GETCHUNK msg
+			if(!Files.hasChunk(ck)) {
+				System.out.println("PROTOCOL: Ignored GETCHUNK");
+				return;
+			}
+			
+			Chunk chunk = Files.getChunk(ck);
+
+			// TODO
+			// wait between 0 and 400ms and send CHUNK if needed
 	
-	// TODO
-	public static void handleCHUNK(byte[] msg, Peer sender) {}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static void sendCHUNK(Peer sender, Chunk chunk) throws Exception {
+		String header = "CHUNK" + " " + VERSION +
+				" " + sender.get_ip() +
+				" " + chunk.getFileID() +
+				" " + chunk.getNo() +
+				" " + CRLF + CRLF;
+
+		byte[] packet = MulticastChannel.readyPacket(header.getBytes(), chunk.getData());
+
+		Messenger.sendToMDR(packet);
+
+		System.out.println("PROTOCOL: sent a CHUNK to MDR");		
+	}
+
+	public static void handleCHUNK(byte[] msg, Peer sender) {
+		try {
+			byte[] body = MulticastChannel.extractBody(msg);
+			String[] msg_tokens = MulticastChannel.msgTokens;
+			String fileID = msg_tokens[3];
+			int chunkNo = Integer.parseInt(msg_tokens[4]);
+
+			// update restored chunk array if the peer is expecting to receive chunks
+			if(MDR.expectingChunks()) {
+				Chunk new_chunk = new Chunk(fileID, chunkNo, 0, body);
+				Restore.addChunk(new_chunk);
+			}
+
+			// update MDR confirms
+			ChunkKey chunkKey = new ChunkKey(chunkNo, fileID);
+			MDR.addChunkConfirm(chunkKey);
+
+			// update chunk database
+			PeerService.getDatabase().removePeerFromChunkPeerList(chunkKey, sender);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 }

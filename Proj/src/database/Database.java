@@ -94,20 +94,20 @@ public class Database implements Serializable {
 	/*
 	 * restorable files database
 	 */
-	public synchronized void addRestorableFile(String file, FileDetails fileDetails){
-		restorableFiles.put(file, fileDetails);
+	public synchronized void addRestorableFile(String filename, FileDetails fileDetails){
+		restorableFiles.put(filename, fileDetails);
 		
 		PeerService.saveDatabase();
 	}
 	
-	public synchronized void removeRestorableFile(String file){
-		restorableFiles.remove(file);
+	public synchronized void removeRestorableFile(String filename){
+		restorableFiles.remove(filename);
 		
 		PeerService.saveDatabase();
 	}
 	
-	public synchronized boolean fileWasSaved(String file){
-		return restorableFiles.containsKey(file);
+	public synchronized boolean fileWasSaved(String filename){
+		return restorableFiles.containsKey(filename);
 	}
 	
 }

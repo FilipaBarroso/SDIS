@@ -31,7 +31,7 @@ public class Messenger implements Runnable {
 		this.server = server;
 
 		System.out.println("MESSENGER: Login from peer " + localPeer.get_ip() + ":" + localPeer.get_port());
-		System.out.println("MESSENGER: Valid Operations: backup\trestore\t");
+		System.out.println("MESSENGER: Valid Operations: backup & restore");
 	}
 
 	public void run() {
@@ -66,7 +66,7 @@ public class Messenger implements Runnable {
 			String filename;
 			int repD;
 		
-			System.out.println("MESSENGER: Specify backup <filename replicationDegree>");
+			System.out.println("MESSENGER: Specify backup <filename> <replicationDegree>");
 			String s = (String)cin.readLine();
 			String[] tokens = s.split("\\s+");
 			
@@ -76,7 +76,6 @@ public class Messenger implements Runnable {
 			Protocol.initiateBackup(filename, repD);
 			
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -96,7 +95,6 @@ public class Messenger implements Runnable {
 			Protocol.initiateBackup(filename, repD);
 			
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -118,5 +116,10 @@ public class Messenger implements Runnable {
 	public static void sendToMDB(byte[] msg) throws Exception {
 		DatagramPacket mdb_packet = new DatagramPacket(msg, msg.length, server, PeerService.default_MDBport);
 		socket.send(mdb_packet);
+	}
+	
+	public static void sendToMDR(byte[] msg) throws Exception {
+		DatagramPacket mdr_packet = new DatagramPacket(msg, msg.length, server, PeerService.default_MDRport);
+		socket.send(mdr_packet);
 	}
 }
