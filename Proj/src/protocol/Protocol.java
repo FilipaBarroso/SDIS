@@ -29,13 +29,22 @@ public class Protocol {
 		filename = Files.FILE_PATH + filename;
 		File file = new File(filename);
 
-		// create CHUNKS folder
-		File chunks = new File(Files.LOCAL_CHUNKS_PATH);
-		chunks.mkdir();
-
 		Backup backup = new Backup(file, repD);
 		new Thread(backup).start();
 	}
+	
+	public static void initiateRestore(String filename) {
+		filename = Files.FILE_PATH + filename;
+		File file = new File(filename);
+
+		// create RESTORED_CHUNKS folder
+		File chunks = new File(Files.RESTORED_CHUNKS_PATH);
+		if(!chunks.exists() || !chunks.isDirectory())
+			chunks.mkdir();
+
+		Restore restore = new Restore(file);
+		new Thread(restore).start();
+	}	
 
 	public static void sendPUTCHUNK(Chunk chunk, ChunkKey ck) throws Exception {
 		MC.readyStoredConfirms(ck);
@@ -120,17 +129,36 @@ public class Protocol {
 			
 			MC.addStoredConfirm(chunkKey, sender);
 			
-			// TODO
-			// update database
+			// update chunk database
+			PeerService.getDatabase().addPeerToChunkPeerList(chunkKey, sender);
 			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
-	// TODO
-	public static void sendGETCHUNK() {}
+	public static void sendGETCHUNK(Peer sender, String fileID, int chunkNo) throws Exception {
+		System.out.println("PROTOCOL: asking for the file " + fileID);
+		
+		String header = "GETCHUNK" + " " + VERSION +
+				" " + sender.get_ip() +
+				" " + fileID +
+				" " + chunkNo +
+				" " + CRLF + CRLF;
+		
+		byte[] packet = MulticastChannel.readyPacket(header.getBytes(), "".getBytes());
+
+		Messenger.sendToMC(packet);
+
+		System.out.println("PROTOCOL: sent a GETCHUNK to MC");
+	}
 	
 	// TODO
-	public static void handleGETCHUNK() {}
+	public static void handleGETCHUNK(byte[] msg, Peer sender) {}
+
+	// TODO
+	public static void sendCHUNK() {}
+	
+	// TODO
+	public static void handleCHUNK(byte[] msg, Peer sender) {}
 }

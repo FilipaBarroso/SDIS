@@ -9,7 +9,9 @@ import java.util.Arrays;
 import channels.MC;
 import data.Files;
 import database.ChunkKey;
+import database.FileDetails;
 import service.Chunk;
+import service.PeerService;
 
 
 public class Backup implements Runnable {
@@ -26,11 +28,20 @@ public class Backup implements Runnable {
 	}
 
 	public void run() {
+		if(PeerService.getDatabase().fileWasSaved(file.getName())) {
+			System.out.println("BACKUP: File already exists in the database");
+			return;
+		}
+		
 		Chunk[] chunkArray;
 		try {
 			chunkArray = getChunks(file);
 
-			backupChunks(chunkArray);
+			backupChunks(chunkArray);	
+			
+			// save file on database
+			FileDetails fd = new FileDetails(fileID, chunkArray.length);
+			PeerService.getDatabase().addRestorableFile(file.getName(), fd);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -95,7 +106,7 @@ public class Backup implements Runnable {
 				
 				if(numStoredConfs >= replicationDegree)	break;
 				
-				System.out.println("BACKUP: Failed to get desirable replication degree.. trying again");
+				System.out.println("BACKUP: Failed to get desirable replication degree.. trying again\n--------------------");
 				wait_time *= 2;
 				num_tries++;
 			}
@@ -108,7 +119,7 @@ public class Backup implements Runnable {
 		}
 		
 		// debbugging, guarda-se os chunks localmente
-		Files.loadChunks(chunkArray, this.file.getName());
+		//Files.loadChunks(chunkArray, this.file.getName());
 	}
 
 }

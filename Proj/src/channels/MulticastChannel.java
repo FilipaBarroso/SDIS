@@ -81,8 +81,10 @@ public abstract class MulticastChannel {
 			Protocol.handleSTORED(msg, sender);
 			break;
 		case "GETCHUNK":
+			Protocol.handleGETCHUNK(msg, sender);
 			break;
 		case "CHUNK":
+			Protocol.handleCHUNK(msg, sender);
 			break;
 		case "DELETE":
 			break;

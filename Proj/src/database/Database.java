@@ -94,7 +94,6 @@ public class Database implements Serializable {
 	/*
 	 * restorable files database
 	 */
-	
 	public synchronized void addRestorableFile(String file, FileDetails fileDetails){
 		restorableFiles.put(file, fileDetails);
 		
@@ -110,9 +109,5 @@ public class Database implements Serializable {
 	public synchronized boolean fileWasSaved(String file){
 		return restorableFiles.containsKey(file);
 	}
-	
-	
-	
-
 	
 }

@@ -10,105 +10,38 @@ import channels.MC;
 import data.Files;
 import database.ChunkKey;
 import service.Chunk;
-
+import service.PeerService;
 
 public class Restore implements Runnable {
 
 	private File file;
 	private String fileID;
-	private int replicationDegree;
+	private int num_chunks;
+	private Chunk[] chunkArray;
 
-	public Restore(File file, int replicationDegree) {
+	public Restore(File file) {
 		this.file = file;
-		this.replicationDegree = replicationDegree;
-
 		this.fileID = Files.getFileID(file);
+		num_chunks = (int) (Math.floor(file.length() / Chunk.MAX_SIZE) + 1);
+		chunkArray = new Chunk[num_chunks];
 	}
 
 	public void run() {
-		Chunk[] chunkArray;
 		try {
-			chunkArray = getChunks(file);
+			int i;
+			for(i=0; i < num_chunks; i++) {
+				Protocol.sendGETCHUNK(PeerService.getLocalPeer(), fileID, i);
 
-			backupChunks(chunkArray);
+				// wait 400ms for the CHUNK msg
+				Thread.sleep(400);
+				
+				
+			}
+
+			Files.loadChunks(chunkArray, file.getName());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	}
-
-	public Chunk[] getChunks(File file) throws FileNotFoundException {
-		byte[] fileData = Files.getFileData(file);
-
-		// num_chunk deve ter um ultimo chunk vazio
-		int num_chunks = (int) (Math.floor(file.length() / Chunk.MAX_SIZE) + 1);
-		Chunk[] chunkArray = new Chunk[num_chunks];
-
-		ByteArrayInputStream fileStream = new ByteArrayInputStream(fileData);
-		byte[] chunkStream = new byte[Chunk.MAX_SIZE];
-
-		int i;
-		for(i=0; i < num_chunks - 1; i++) {
-			byte[] tmp_chunk;
-			fileStream.read(chunkStream, 0, chunkStream.length);
-			tmp_chunk = Arrays.copyOfRange(chunkStream, 0, Chunk.MAX_SIZE);	
-
-			Chunk chunk = new Chunk(this.fileID, i, this.replicationDegree, tmp_chunk);
-			chunkArray[i] = chunk;
-		}
-
-		if(file.length() % Chunk.MAX_SIZE == 0) {
-			byte[] empty_chunk = new byte[0];
-			Chunk chunk = new Chunk(this.fileID, i, this.replicationDegree, empty_chunk);
-			chunkArray[i] = chunk;
-		}
-
-		else {
-			byte[] tmp_chunk;
-			int bytesRead = fileStream.read(chunkStream, 0, chunkStream.length);
-			tmp_chunk = Arrays.copyOfRange(chunkStream, 0, bytesRead);	
-
-			Chunk chunk = new Chunk(this.fileID, i, this.replicationDegree, tmp_chunk);
-			chunkArray[i] = chunk;
-		}
-
-		return chunkArray;
-	}
-
-	public void backupChunks(Chunk[] chunkArray) throws Exception {
-		int j;
-		System.out.println("BACKUP: Number of chunks created = " + chunkArray.length + "\n");
-		for(j=0; j < chunkArray.length; j++) {		
-			int wait_time = 1000;
-			int num_tries = 0;
-			
-			ChunkKey ck = new ChunkKey(chunkArray[j].getNo(), chunkArray[j].getFileID());
-
-			while(num_tries < 5) {
-				// sendPUTCHUNK also gets the MC ready to count the STORED confirmations for that chunk	
-				Protocol.sendPUTCHUNK(chunkArray[j], ck);
-
-				// wait for STORED confirms
-				System.out.println("PROTOCOL: Waiting for STORED confirms for " + wait_time);
-				Thread.sleep(wait_time);
-
-				int numStoredConfs = MC.getNumStoredConfs(ck);
-				
-				if(numStoredConfs >= replicationDegree)	break;
-				
-				System.out.println("BACKUP: Failed to get desirable replication degree.. trying again");
-				wait_time *= 2;
-				num_tries++;
-			}
-			
-			System.out.print("BACKUP: Saved chunk");
-			if(num_tries < 5) System.out.print(" with a desirable replication degree");
-			System.out.println("\n--------------------");			
-
-			MC.deleteStoredConfs(ck);
-		}
-		
-		// debbugging, guarda-se os chunks localmente
-		Files.loadChunks(chunkArray, this.file.getName());
 	}
 
 }

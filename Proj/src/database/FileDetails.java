@@ -6,6 +6,8 @@ public class FileDetails implements Serializable{
 	private static final long serialVersionUID = 3L;
 	
 	private String fileID;
+
+
 	private int nChunks;
 	
 	public FileDetails(String fileID, int nChunks){

@@ -15,6 +15,8 @@ public class Peer implements Serializable {
 		this.set_port(port);
 	}
 
+	public Peer() {}
+
 	public InetAddress get_ip() {
 		return ip;
 	}

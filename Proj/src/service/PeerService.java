@@ -1,14 +1,15 @@
 package service;
 
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.util.Random;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
 import channels.MC;
@@ -16,7 +17,6 @@ import channels.MDB;
 import channels.MDR;
 import channels.Messenger;
 import database.Database;
-
 
 public class PeerService {
 
@@ -26,7 +26,8 @@ public class PeerService {
 
 	private static volatile Database database;
 	private static final String DATABASE_STRING = "database.data";
-	
+	private static File db;
+
 	private static volatile MC mcThread;
 	private static volatile MDB mdbThread;
 	private static volatile MDR mdrThread;
@@ -47,12 +48,16 @@ public class PeerService {
 		new Thread(mcThread).start();
 		mdbThread = new MDB(InetAddress.getByName(defaultServer), default_MDBport, localPeer.get_ip());
 		new Thread(mdbThread).start();
-		//	new Thread(mdrThread).start();
+		mdrThread = new MDR(InetAddress.getByName(defaultServer), default_MDRport, localPeer.get_ip());
+		new Thread(mdrThread).start();
 
 		Messenger messenger = new Messenger(socket, localPeer, InetAddress.getByName(defaultServer));
 		new Thread(messenger).start();
-		
-		loadDatabase();
+
+
+		db = new File(DATABASE_STRING);
+		if(!db.exists()) createDatabase();
+		else loadDatabase();
 	}
 
 	public static Peer getLocalPeer() {
@@ -82,57 +87,49 @@ public class PeerService {
 	public static MulticastSocket getSocket() {
 		return socket;
 	}
-	
+
 
 	/*
 	 * database functions
 	 */
-	
+
 	private static void createDatabase(){
 		database = new Database();
 		
 		saveDatabase();
 	}
-	
+
 	public static Database getDatabase() {
 		return database;
 	}
-	
+
 	public static void saveDatabase(){
 		try{
 			FileOutputStream fileOutputStream = new FileOutputStream(DATABASE_STRING);
 			ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
-			
+
 			objectOutputStream.writeObject(database);
-			
+
 			objectOutputStream.close();
-			
+
 		} catch (FileNotFoundException e){
-			createDatabase();
-			
 			e.printStackTrace();
 		} catch (IOException e){
 			e.printStackTrace();
 		}
-		
+
 	}
-	
-	
-	 private static void loadDatabase() throws ClassNotFoundException, IOException{
+
+	private static void loadDatabase() throws ClassNotFoundException, IOException{
 		try{
 			FileInputStream fileInputStream = new FileInputStream(DATABASE_STRING);
 			ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
-			
+
 			database = (Database) objectInputStream.readObject();
-			
+
 			objectInputStream.close();
 		} catch(FileNotFoundException e){
-			createDatabase();
-			
 			e.printStackTrace();
 		}
 	}
-	
-
-
 }

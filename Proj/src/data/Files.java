@@ -16,7 +16,7 @@ import service.PeerService;
 public class Files {
 
 	public static String FILE_PATH = "FILES/";
-	public static String LOCAL_CHUNKS_PATH = "LOCAL_CHUNKS/";
+	public static String RESTORED_CHUNKS_PATH = "RESTORED_CHUNKS/";
 	public static String CHUNKS_PATH = "CHUNKS/";
 	
 	public static String getFileID(File file) {
@@ -61,7 +61,7 @@ public class Files {
 	
 	public static void loadChunks(Chunk[] chunkArray, String filename) throws FileNotFoundException {
 		// create folder for these CHUNKS
-		String path = LOCAL_CHUNKS_PATH + filename;
+		String path = RESTORED_CHUNKS_PATH + filename;
 		File dir = new File(path);
 		dir.mkdir();
 		

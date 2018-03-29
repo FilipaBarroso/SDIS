@@ -4,13 +4,16 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
+import java.util.ArrayList;
+import java.util.HashMap;
 
+import database.ChunkKey;
 import protocol.Protocol;
 import service.Peer;
 import service.PeerService;
 
 /*
- * Deals with chunk restore messages
+ * Deals with CHUNK restore messages
  */
 public class MDR extends MulticastChannel implements Runnable {
 
@@ -18,6 +21,8 @@ public class MDR extends MulticastChannel implements Runnable {
 	private DatagramPacket packet;
 	private byte[] buffer;
 	private InetAddress localPeerIP;
+	
+	private volatile static HashMap<String, ChunkKey> chunkConfs;
 	
 	public MDR(InetAddress ip, int port, InetAddress localPeerIP) throws Exception {
 		super(ip, port);
@@ -28,6 +33,8 @@ public class MDR extends MulticastChannel implements Runnable {
 		socket = new MulticastSocket(port);
 		socket.joinGroup(getIp());
 		packet = new DatagramPacket(buffer, buffer.length);
+		
+		chunkConfs = new HashMap<String, ChunkKey>();
 	}
 
 	public void run() {
@@ -54,4 +61,18 @@ public class MDR extends MulticastChannel implements Runnable {
 		}
 	}
 	
+	public static void addChunkConfirm(String fileID, ChunkKey ck) {
+		if(!chunkConfs.containsKey(fileID))
+			chunkConfs.put(fileID, ck);
+	}
+	
+	public static boolean hasChunkConf(ChunkKey ck) {
+		if(!chunkConfs.containsKey(ck)) return false;
+		
+		return true;
+	}
+	
+	public static void deleteChunkConfs(ChunkKey ck) {
+		chunkConfs.remove(ck);
+	}
 }

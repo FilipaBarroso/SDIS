@@ -16,7 +16,7 @@ public class ChunkDetails implements Serializable {
 		setPeerList(p);
 		
 	}
- 
+
 	public int getRepD() {
 		return repD;
 	}

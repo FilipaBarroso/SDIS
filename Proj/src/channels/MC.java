@@ -89,7 +89,5 @@ public class MC extends MulticastChannel implements Runnable {
 	
 	public static void deleteStoredConfs(ChunkKey ck) {
 		storedConfs.remove(ck);
-	}
-	
-	
+	}	
 }
