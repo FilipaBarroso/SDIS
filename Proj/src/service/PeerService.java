@@ -1,10 +1,12 @@
 package service;
 
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.util.Random;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.ObjectOutputStream;
@@ -14,6 +16,7 @@ import channels.MDB;
 import channels.MDR;
 import channels.Messenger;
 import database.Database;
+
 
 public class PeerService {
 
@@ -49,7 +52,7 @@ public class PeerService {
 		Messenger messenger = new Messenger(socket, localPeer, InetAddress.getByName(defaultServer));
 		new Thread(messenger).start();
 		
-		// loadDatabase();
+		loadDatabase();
 	}
 
 	public static Peer getLocalPeer() {
@@ -114,11 +117,21 @@ public class PeerService {
 		
 	}
 	
-	/* TODO
-	 private static void loadDatabase(){
-		
+	
+	 private static void loadDatabase() throws ClassNotFoundException, IOException{
+		try{
+			FileInputStream fileInputStream = new FileInputStream(DATABASE_STRING);
+			ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
+			
+			database = (Database) objectInputStream.readObject();
+			
+			objectInputStream.close();
+		} catch(FileNotFoundException e){
+			createDatabase();
+			
+			e.printStackTrace();
+		}
 	}
-	*/
 	
 
 

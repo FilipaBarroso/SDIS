@@ -36,6 +36,10 @@ public class Database implements Serializable {
 	public HashMap<String, FileDetails> getRestorableFiles() {
 		return restorableFiles;
 	}
+	
+	public synchronized FileDetails getFileDetails(String file){
+		return restorableFiles.get(file);
+	}
 
 	public void setRestorableFiles(HashMap<String, FileDetails> restorableFiles) {
 		this.restorableFiles = restorableFiles;
@@ -65,6 +69,48 @@ public class Database implements Serializable {
 		
 		PeerService.saveDatabase();
 	}
+	
+	public synchronized void addPeerToChunkPeerList(ChunkKey chunkKey, Peer peer){
+		if(containsChunk(chunkKey) && !chunkDB.get(chunkKey).getPeerList().contains(peer)){
+			chunkDB.get(chunkKey).getPeerList().add(peer);
+			
+			PeerService.saveDatabase();
+		}
+	}
+	
+	public synchronized void removePeerFromChunkPeerList(ChunkKey chunkKey, Peer peer){
+		if(chunkDB.get(chunkKey).getPeerList().contains(peer)){
+			chunkDB.get(chunkKey).removePeer(peer);
+			
+			PeerService.saveDatabase();
+		}
+	}
+	
+	public synchronized int getChunkNofPeers(ChunkKey chunkKey){
+		return chunkDB.get(chunkKey).getPeerList().size();
+	}
+	
+	
+	/*
+	 * restorable files database
+	 */
+	
+	public synchronized void addRestorableFile(String file, FileDetails fileDetails){
+		restorableFiles.put(file, fileDetails);
+		
+		PeerService.saveDatabase();
+	}
+	
+	public synchronized void removeRestorableFile(String file){
+		restorableFiles.remove(file);
+		
+		PeerService.saveDatabase();
+	}
+	
+	public synchronized boolean fileWasSaved(String file){
+		return restorableFiles.containsKey(file);
+	}
+	
 	
 	
 
