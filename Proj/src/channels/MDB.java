@@ -12,6 +12,9 @@ import service.Chunk;
 import service.Peer;
 import service.PeerService;
 
+/*
+ * Deals with putchunk messages
+ */
 public class MDB extends MulticastChannel implements Runnable {
 
 	private MulticastSocket socket;

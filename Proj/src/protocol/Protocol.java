@@ -127,4 +127,10 @@ public class Protocol {
 			e.printStackTrace();
 		}
 	}
+
+	// TODO
+	public static void sendGETCHUNK() {}
+	
+	// TODO
+	public static void handleGETCHUNK() {}
 }

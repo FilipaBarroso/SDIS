@@ -79,7 +79,13 @@ public abstract class MulticastChannel {
 			break;
 		case "STORED":
 			Protocol.handleSTORED(msg, sender);
-			break;	
+			break;
+		case "GETCHUNK":
+			break;
+		case "CHUNK":
+			break;
+		case "DELETE":
+			break;
 		default:
 			break;
 		}
@@ -97,7 +103,7 @@ public abstract class MulticastChannel {
 			headerBytes += line.getBytes().length;
 		} while(!line.isEmpty());
 
-		headerBytes += Protocol.CRLF.getBytes().length;
+		headerBytes += 2*Protocol.CRLF.getBytes().length;
 		byte[] body = new byte[msg.length - headerBytes];
 		System.arraycopy(msg, headerBytes, body, 0, msg.length - headerBytes);
 

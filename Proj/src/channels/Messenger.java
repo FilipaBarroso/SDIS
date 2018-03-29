@@ -31,7 +31,7 @@ public class Messenger implements Runnable {
 		this.server = server;
 
 		System.out.println("MESSENGER: Login from peer " + localPeer.get_ip() + ":" + localPeer.get_port());
-		System.out.println("MESSENGER: Valid Operations: backup\t");
+		System.out.println("MESSENGER: Valid Operations: backup\trestore\t");
 	}
 
 	public void run() {
@@ -45,6 +45,9 @@ public class Messenger implements Runnable {
 			switch(c) {
 			case 1:
 				handleBackupMsg();
+				break;
+			case 2:
+				handleRestoreMsg();
 				break;
 			default:
 				break;
@@ -76,7 +79,26 @@ public class Messenger implements Runnable {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	public static void handleRestoreMsg() {
+		try {
+			String filename;
+			int repD;
 		
+			System.out.println("MESSENGER: Specify restore <filename>");
+			String s = (String)cin.readLine();
+			String[] tokens = s.split("\\s+");
+			
+			filename = tokens[0];
+			repD = Integer.parseInt(tokens[1]);
+			
+			Protocol.initiateBackup(filename, repD);
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	public static int decypherConsole(String s) {

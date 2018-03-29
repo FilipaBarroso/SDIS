@@ -12,13 +12,13 @@ import database.ChunkKey;
 import service.Chunk;
 
 
-public class Backup implements Runnable {
+public class Restore implements Runnable {
 
 	private File file;
 	private String fileID;
 	private int replicationDegree;
 
-	public Backup(File file, int replicationDegree) {
+	public Restore(File file, int replicationDegree) {
 		this.file = file;
 		this.replicationDegree = replicationDegree;
 
