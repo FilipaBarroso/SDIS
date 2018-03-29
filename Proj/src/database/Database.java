@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import service.PeerService;
+import service.Peer;
 
 
 public class Database implements Serializable {
@@ -51,7 +52,7 @@ public class Database implements Serializable {
 	
 	public synchronized void addChunk(ChunkKey chunkKey, int repD){
 		if(containsChunk(chunkKey) != true){
-			ChunkDetails chunkDetails = new ChunkDetails(repD, new ArrayList<PeerKey>());
+			ChunkDetails chunkDetails = new ChunkDetails(repD, new ArrayList<Peer>());
 			
 			chunkDB.put(chunkKey, chunkDetails);
 			

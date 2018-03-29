@@ -42,7 +42,7 @@ public class MDR extends MulticastChannel implements Runnable {
 			}
 			
 			Peer sender = new Peer(packet.getAddress(), packet.getPort());
-			if(sender.same(PeerService.getLocalPeer())) continue;
+			if(sender.equals(PeerService.getLocalPeer())) continue;
 			
 			buffer = packet.getData();
 			decypherMsg(buffer, sender);

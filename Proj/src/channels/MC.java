@@ -52,7 +52,7 @@ public class MC extends MulticastChannel implements Runnable {
 				//System.out.println("MC: sender\t" + sender.get_ip() + " : " + sender.get_port());
 				//System.out.println("MC: local\t" + PeerService.getLocalPeer().get_ip() + " : " + PeerService.getLocalPeer().get_port());
 				
-				if(sender.same(PeerService.getLocalPeer())) continue;
+				if(sender.equals(PeerService.getLocalPeer())) continue;
 				
 				buffer = packet.getData();
 				decypherMsg(buffer, sender);

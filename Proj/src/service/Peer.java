@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.net.InetAddress;
 import java.util.Objects;
 
+
 public class Peer implements Serializable {
 	private static final long serialVersionUID = 3L;
 	private InetAddress ip;
@@ -30,13 +31,27 @@ public class Peer implements Serializable {
 		this.port = port;
 	}
 	
-	public boolean same(Object obj) {		
-		if(obj == null || getClass() != obj.getClass()) return false;
-		
-		Peer peerObj = (Peer)obj;
-		
-		if(!peerObj.get_ip().equals(ip) || peerObj.get_port() != port) return false;
-		
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+
+		if (obj == null)
+			return false;
+
+		if (getClass() != obj.getClass())
+			return false;
+
+		Peer other = (Peer) obj;
+
+		if (ip == null && other.ip != null) {
+			return false;
+		} else if (!ip.equals(other.ip))
+			return false;
+
+		if (port != other.port)
+			return false;
+
 		return true;
 	}
 	

@@ -3,13 +3,15 @@ package database;
 import java.io.Serializable;
 import java.util.ArrayList;
 
+import service.Peer;
+
 public class ChunkDetails implements Serializable {
 	private static final long serialVersionUID = 3L;
 	
 	private int repD;
-	private ArrayList<PeerKey> peerList;
+	private ArrayList<Peer> peerList;
 	
-	public ChunkDetails(int r, ArrayList<PeerKey> p){
+	public ChunkDetails(int r, ArrayList<Peer> p){
 		setRepD(r);
 		setPeerList(p);
 		
@@ -23,11 +25,11 @@ public class ChunkDetails implements Serializable {
 		this.repD = repD;
 	}
 
-	public ArrayList<PeerKey> getPeerList() {
+	public ArrayList<Peer> getPeerList() {
 		return peerList;
 	}
 
-	public void setPeerList(ArrayList<PeerKey> peersList) {
+	public void setPeerList(ArrayList<Peer> peersList) {
 		this.peerList = peersList;
 	}
 	
