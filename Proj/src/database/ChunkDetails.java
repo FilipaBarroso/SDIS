@@ -16,7 +16,7 @@ public class ChunkDetails implements Serializable {
 		setPeerList(p);
 		
 	}
-
+ 
 	public int getRepD() {
 		return repD;
 	}
@@ -33,8 +33,8 @@ public class ChunkDetails implements Serializable {
 		this.peerList = peersList;
 	}
 	
-	public void removePeer(PeerKey peerKey){
-		peerList.remove(peerKey);
+	public void removePeer(Peer peer){
+		peerList.remove(peer);
 	}
 
 }

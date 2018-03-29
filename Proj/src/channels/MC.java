@@ -9,7 +9,6 @@ import java.util.HashMap;
 
 import data.Files;
 import database.ChunkKey;
-import database.PeerKey;
 import protocol.Protocol;
 import service.Chunk;
 import service.Peer;
