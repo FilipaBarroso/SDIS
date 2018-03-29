@@ -17,6 +17,7 @@ import channels.MDB;
 import channels.MDR;
 import channels.Messenger;
 import database.Database;
+import data.Storage;
 
 public class PeerService {
 
@@ -27,6 +28,10 @@ public class PeerService {
 	private static volatile Database database;
 	private static final String DATABASE_STRING = "database.data";
 	private static File db;
+	
+	private static Storage storage;
+	private static final String STORAGE_STRING = "storage.data";
+	private static File st;
 
 	private static volatile MC mcThread;
 	private static volatile MDB mdbThread;
@@ -56,8 +61,16 @@ public class PeerService {
 
 
 		db = new File(DATABASE_STRING);
-		if(!db.exists()) createDatabase();
-		else loadDatabase();
+		if(!db.exists()) 
+			createDatabase();
+		else 
+			loadDatabase();
+		
+		st = new File (STORAGE_STRING);
+		if(!st.exists())
+			createStorage();
+		else
+			loadStorage();
 	}
 
 	public static Peer getLocalPeer() {
@@ -132,4 +145,43 @@ public class PeerService {
 			e.printStackTrace();
 		}
 	}
+	
+	private static void createStorage(){
+		storage = new Storage();
+		
+		saveStorage();
+	}
+
+	public static void saveStorage() {
+		try{
+			FileOutputStream fileOutputStream = new FileOutputStream(STORAGE_STRING);
+			ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
+
+			objectOutputStream.writeObject(storage);
+
+			objectOutputStream.close();
+		} catch (FileNotFoundException e) {
+			System.out.println("Storage Not Found");
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private static void loadStorage() throws ClassNotFoundException, IOException {
+		try {
+			FileInputStream fileInputStream = new FileInputStream(STORAGE_STRING);
+			ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
+
+			storage = (Storage) objectInputStream.readObject();
+
+			objectInputStream.close();
+		} catch (FileNotFoundException e) {
+			System.out.println("Storage Not Found");
+
+		}
+	}
+	
+	
+	
 }
