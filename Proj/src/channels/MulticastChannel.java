@@ -8,6 +8,7 @@ import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+import java.util.Arrays;
 import java.util.Random;
 
 import protocol.Protocol;
@@ -39,38 +40,11 @@ public abstract class MulticastChannel {
 		this.ip = ip;
 	}
 
-	// SHA256 hash function
-	public static final String sha256(String str) {
-		try {
-			MessageDigest sha = MessageDigest.getInstance("SHA-256");
-
-			byte[] hash = sha.digest(str.getBytes(StandardCharsets.UTF_8));
-
-			StringBuffer hexStringBuffer = new StringBuffer();
-
-			for (int i = 0; i < hash.length; i++) {
-				String hex = Integer.toHexString(0xff & hash[i]);
-
-				if (hex.length() == 1)
-					hexStringBuffer.append('0');
-
-				hexStringBuffer.append(hex);
-			}
-
-			return hexStringBuffer.toString();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		return null;
-	}
-
-
 	public static String[] msgTokens;
 
-	public static void decypherMsg(byte[] msg, Peer sender) {
+	public static void decypherMsg(DatagramPacket msg, Peer sender) {
 		// extract header
-		String s = new String(msg, 0, msg.length);
+		String s = new String(msg.getData(), 0, msg.getLength());
 		msgTokens = s.split("\\s+");
 
 		switch(msgTokens[0]) {
@@ -93,8 +67,8 @@ public abstract class MulticastChannel {
 		}
 	}
 
-	public static byte[] extractBody(byte[] msg) throws IOException {
-		ByteArrayInputStream stream = new ByteArrayInputStream(msg);
+	public static byte[] extractBody(DatagramPacket msg) throws IOException {
+		ByteArrayInputStream stream = new ByteArrayInputStream(msg.getData());
 		BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
 
 		// ler a msg até encontrar o CRLF
@@ -106,9 +80,8 @@ public abstract class MulticastChannel {
 		} while(!line.isEmpty());
 
 		headerBytes += 2*Protocol.CRLF.getBytes().length;
-		byte[] body = new byte[msg.length - headerBytes];
-		System.arraycopy(msg, headerBytes, body, 0, msg.length - headerBytes);
-
+		byte[] body = Arrays.copyOfRange(msg.getData(), headerBytes, msg.getLength());
+		
 		return body;
 	}
 

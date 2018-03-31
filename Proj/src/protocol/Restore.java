@@ -25,6 +25,15 @@ public class Restore implements Runnable {
 		this.fileID = Files.getFileID(file);
 		num_chunks = (int) (Math.floor(file.length() / Chunk.MAX_SIZE) + 1);
 		chunkArray = new Chunk[num_chunks];
+		
+		// create RESTORED_CHUNKS folder
+		File res_files = new File(Files.RESTORED_FILES_PATH);
+		if(!res_files.exists() || !res_files.isDirectory())
+			res_files.mkdir();
+		
+		File res_chunks = new File(Files.RESTORED_CHUNKS_PATH);
+		if(!res_chunks.exists() || !res_chunks.isDirectory())
+			res_chunks.mkdir();
 	}
 
 	public void run() {
@@ -38,21 +47,22 @@ public class Restore implements Runnable {
 				
 				// wait 400ms for the CHUNK msg
 				Thread.sleep(400);
-			}
-
-			// debbugging, saving the chunks locally
-			Files.loadChunks(chunkArray, file.getName());	
+			}	
 			
-			// TODO
-			// convert chunks into a single file
-			
-			// no longer dealing with CHUNK messages
 			MDR.doneExpectingChunks();
 			
 			if(MDR.numChunkConfirmsForFile(fileID) < num_chunks) {
 				System.out.println("RESTORE: Couldn't restore file");
 				return;
 			}
+
+			// debbugging, saving the chunks locally
+			Files.loadChunks(chunkArray, file.getName(), fileID);	
+			
+			// convert chunks into a single file
+			Files.convertChunks(chunkArray, file.getName(), fileID);
+
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

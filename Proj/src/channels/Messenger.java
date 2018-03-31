@@ -31,7 +31,7 @@ public class Messenger implements Runnable {
 		this.server = server;
 
 		System.out.println("MESSENGER: Login from peer " + localPeer.get_ip() + ":" + localPeer.get_port());
-		System.out.println("MESSENGER: Valid Operations: backup & restore");
+		System.out.println("MESSENGER: Valid Operations: backup, restore");
 	}
 
 	public void run() {
@@ -54,8 +54,7 @@ public class Messenger implements Runnable {
 			}
 			
 		}
-		catch (IOException e) {
-			// TODO Auto-generated catch block
+		catch (Exception e) {
 			e.printStackTrace();
 		}
 		}
@@ -65,10 +64,13 @@ public class Messenger implements Runnable {
 		try {
 			String filename;
 			int repD;
-		
+			String[] tokens;
+			
+			do {
 			System.out.println("MESSENGER: Specify backup <filename> <replicationDegree>");
 			String s = (String)cin.readLine();
-			String[] tokens = s.split("\\s+");
+			tokens = s.split("\\s+");
+			}	while(tokens.length != 2);
 			
 			filename = tokens[0];
 			repD = Integer.parseInt(tokens[1]);
@@ -84,15 +86,17 @@ public class Messenger implements Runnable {
 		try {
 			String filename;
 			int repD;
-		
+			String[] tokens;
+			
+			do {
 			System.out.println("MESSENGER: Specify restore <filename>");
 			String s = (String)cin.readLine();
-			String[] tokens = s.split("\\s+");
+			tokens = s.split("\\s+");
+			}	while(tokens.length != 1);			
 			
 			filename = tokens[0];
-			repD = Integer.parseInt(tokens[1]);
 			
-			Protocol.initiateBackup(filename, repD);
+			Protocol.initiateRestore(filename);
 			
 		} catch (IOException e) {
 			e.printStackTrace();

@@ -28,13 +28,14 @@ public class MDR extends MulticastChannel implements Runnable {
 	public MDR(InetAddress ip, int port, InetAddress localPeerIP) throws Exception {
 		super(ip, port);
 
+		this.buffer = new byte[Protocol.MAX_BUFFER];
 		this.localPeerIP = localPeerIP;
-		buffer = new byte[Protocol.MAX_BUFFER];
 		socket = new MulticastSocket(port);
 		socket.joinGroup(getIp());
 		packet = new DatagramPacket(buffer, buffer.length);
 		
 		expectingChunks = false;
+		chunkConfs = new ArrayList<ChunkKey>();
 	}
 
 	public void run() {
@@ -51,17 +52,11 @@ public class MDR extends MulticastChannel implements Runnable {
 			Peer sender = new Peer(packet.getAddress(), packet.getPort());
 			if(sender.equals(PeerService.getLocalPeer())) continue;
 			
-			buffer = packet.getData();
-			decypherMsg(buffer, sender);
-			
-			/*
-			String s = new String(buffer, 0, packet.getLength());
-			System.out.println("\nMDB:"+ s + "\n");
-			*/
+			decypherMsg(packet, sender);
 		}
 	}
 	
-	public static boolean expectingChunks() {return expectingChunks;}
+	public static boolean isExpectingChunks() {return expectingChunks;}
 	
 	public static void doneExpectingChunks() {
 		expectingChunks = false;
@@ -69,7 +64,6 @@ public class MDR extends MulticastChannel implements Runnable {
 	
 	public static void expectChunks() {
 		expectingChunks = true;
-		chunkConfs = new ArrayList<ChunkKey>();
 	}
 	
 	public static void addChunkConfirm(ChunkKey ck) {

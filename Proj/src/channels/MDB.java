@@ -25,8 +25,8 @@ public class MDB extends MulticastChannel implements Runnable {
 	public MDB(InetAddress ip, int port, InetAddress localPeerIP) throws IOException {
 		super(ip, port);
 
+		this.buffer = new byte[Protocol.MAX_BUFFER];
 		this.localPeerIP = localPeerIP;
-		buffer = new byte[Protocol.MAX_BUFFER];
 		socket = new MulticastSocket(port);
 		socket.joinGroup(getIp());
 		packet = new DatagramPacket(buffer, buffer.length);
@@ -46,13 +46,7 @@ public class MDB extends MulticastChannel implements Runnable {
 			Peer sender = new Peer(packet.getAddress(), packet.getPort());
 			if(sender.equals(PeerService.getLocalPeer())) continue;
 			
-			buffer = packet.getData();
-			decypherMsg(buffer, sender);
-			
-			/*
-			String s = new String(buffer, 0, packet.getLength());
-			System.out.println("\nMDB:"+ s + "\n");
-			*/
+			decypherMsg(packet, sender);
 		}
 	}	
 }

@@ -37,12 +37,13 @@ public class Backup implements Runnable {
 			// save file on database
 			FileDetails fd = new FileDetails(fileID, chunkArray.length);
 			PeerService.getDatabase().addRestorableFile(file.getName(), fd);
+			System.out.println("BACKUP: Saved file on database\n--------------------");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
-	public Chunk[] getChunks(File file) throws FileNotFoundException {
+	public Chunk[] getChunks(File file) throws Exception {
 		byte[] fileData = Files.getFileData(file);
 
 		// num_chunk deve ter um ultimo chunk vazio
@@ -76,6 +77,8 @@ public class Backup implements Runnable {
 			Chunk chunk = new Chunk(this.fileID, i, this.replicationDegree, tmp_chunk);
 			chunkArray[i] = chunk;
 		}
+		
+		fileStream.close();
 
 		return chunkArray;
 	}
@@ -108,13 +111,13 @@ public class Backup implements Runnable {
 			
 			System.out.print("BACKUP: Saved chunk");
 			if(num_tries < 5) System.out.print(" with a desirable replication degree");
-			System.out.println("\n--------------------");			
-
+			System.out.print("\n--------------------");
+			
 			MC.deleteStoredConfs(ck);
 		}
-		
+				
 		// debbugging, guarda-se os chunks localmente
-		//Files.loadChunks(chunkArray, this.file.getName());
+		//Files.loadChunks(chunkArray, this.file.getName(), chunk.getFileID());
 	}
 
 }

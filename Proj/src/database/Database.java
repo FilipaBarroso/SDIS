@@ -37,8 +37,8 @@ public class Database implements Serializable {
 		return restorableFiles;
 	}
 	
-	public synchronized FileDetails getFileDetails(String file){
-		return restorableFiles.get(file);
+	public synchronized FileDetails getFileDetails(String filename){
+		return restorableFiles.get(filename);
 	}
 
 	public void setRestorableFiles(HashMap<String, FileDetails> restorableFiles) {
