@@ -22,7 +22,6 @@ public class Messenger implements Runnable {
 	private static Peer localPeer;
 	private static InetAddress server;
 
-	// TODO call this with all channel addrs and ports
 	public Messenger(MulticastSocket socket, Peer localPeer, InetAddress server) throws Exception {
 		buffer = new byte[1024];
 		cin = new BufferedReader(new InputStreamReader(System.in));
@@ -31,7 +30,7 @@ public class Messenger implements Runnable {
 		this.server = server;
 
 		System.out.println("MESSENGER: Login from peer " + localPeer.get_ip() + ":" + localPeer.get_port());
-		System.out.println("MESSENGER: Valid Operations: backup, restore");
+		System.out.println("MESSENGER: You can choose to backup, restore or delete a file");
 	}
 
 	public void run() {
@@ -49,7 +48,11 @@ public class Messenger implements Runnable {
 			case 2:
 				handleRestoreMsg();
 				break;
+			case 3:
+				handleDeleteMsg();
+				break;
 			default:
+				System.out.println("MESSENGER: The protocol '" + s + "' doesn't exist");
 				break;
 			}
 			
@@ -67,7 +70,7 @@ public class Messenger implements Runnable {
 			String[] tokens;
 			
 			do {
-			System.out.println("MESSENGER: Specify backup <filename> <replicationDegree>");
+			System.out.println("MESSENGER: Specify backup protocol <filename> <replicationDegree>");
 			String s = (String)cin.readLine();
 			tokens = s.split("\\s+");
 			}	while(tokens.length != 2);
@@ -89,7 +92,7 @@ public class Messenger implements Runnable {
 			String[] tokens;
 			
 			do {
-			System.out.println("MESSENGER: Specify restore <filename>");
+			System.out.println("MESSENGER: Specify restore protocol <filename>");
 			String s = (String)cin.readLine();
 			tokens = s.split("\\s+");
 			}	while(tokens.length != 1);			
@@ -103,11 +106,31 @@ public class Messenger implements Runnable {
 		}
 	}
 	
+	public static void handleDeleteMsg() {
+		try {
+			String filename;
+			int repD;
+			String[] tokens;
+			
+			do {
+			System.out.println("MESSENGER: Specify delete protocol <filename>");
+			String s = (String)cin.readLine();
+			tokens = s.split("\\s+");
+			}	while(tokens.length != 1);			
+			
+			filename = tokens[0];
+			
+			Protocol.initiateDelete(filename);
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	public static int decypherConsole(String s) {
 		if(s.equals("backup")) return 1;
 		if(s.equals("restore")) return 2;
 		if(s.equals("delete")) return 3;
-		
 		
 		return 0;
 	}

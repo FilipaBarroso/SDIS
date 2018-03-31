@@ -10,20 +10,21 @@ import channels.MC;
 import channels.MDR;
 import data.Files;
 import database.ChunkKey;
+import database.FileDetails;
 import service.Chunk;
 import service.PeerService;
 
 public class Restore implements Runnable {
 
-	private File file;
+	private String filename;
 	private String fileID;
 	private int num_chunks;
 	private static Chunk[] chunkArray;
 
-	public Restore(File file) {
-		this.file = file;
-		this.fileID = Files.getFileID(file);
-		num_chunks = (int) (Math.floor(file.length() / Chunk.MAX_SIZE) + 1);
+	public Restore(String filename, FileDetails fd) {
+		this.filename = filename;
+		this.fileID = fd.getFileID();
+		num_chunks = fd.getnChunks();
 		chunkArray = new Chunk[num_chunks];
 		
 		// create RESTORED_CHUNKS folder
@@ -57,10 +58,10 @@ public class Restore implements Runnable {
 			}
 
 			// debbugging, saving the chunks locally
-			Files.loadChunks(chunkArray, file.getName(), fileID);	
+			// Files.storeRestoredChunks(chunkArray, filename, fileID);	
 			
 			// convert chunks into a single file
-			Files.convertChunks(chunkArray, file.getName(), fileID);
+			Files.convertChunks(chunkArray, filename, fileID);
 
 
 		} catch (Exception e) {

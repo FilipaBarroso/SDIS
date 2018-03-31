@@ -30,7 +30,7 @@ public class Protocol {
 
 	public static void initiateBackup(String filename, int repD) {
 		File file = new File(Files.FILE_PATH + filename);
-		
+
 		if(!PeerService.getDatabase().fileWasSaved(filename)) {
 			Backup backup = new Backup(file, repD);
 			new Thread(backup).start();
@@ -40,15 +40,32 @@ public class Protocol {
 
 	public static void initiateRestore(String filename) {
 		File file = new File(Files.FILE_PATH + filename);
-		
+
 		if(PeerService.getDatabase().getRestorableFiles().keySet().isEmpty()) {
-			System.out.println("PROTOCOL: No restorable files in database");
+			System.out.println("PROTOCOL: No files in the database");
 			return;
 		}
-		
+
 		if(PeerService.getDatabase().fileWasSaved(filename)) {
-			Restore restore = new Restore(file);
+			FileDetails fd = PeerService.getDatabase().getFileDetails(filename);
+			Restore restore = new Restore(filename, fd);
 			new Thread(restore).start();
+		}
+		else System.out.println("PROTOCOL: File with that name doesn't exist in the server");
+	}	
+
+	public static void initiateDelete(String filename) {
+		File file = new File(Files.FILE_PATH + filename);
+
+		if(PeerService.getDatabase().getRestorableFiles().keySet().isEmpty()) {
+			System.out.println("PROTOCOL: No files in the database");
+			return;
+		}
+
+		if(PeerService.getDatabase().fileWasSaved(filename)) {
+			FileDetails fd = PeerService.getDatabase().getFileDetails(filename);
+			Delete delete = new Delete(filename, fd);
+			new Thread(delete).start();
 		}
 		else System.out.println("PROTOCOL: File with that name doesn't exist in the server");
 	}	
@@ -166,19 +183,19 @@ public class Protocol {
 
 			// if the peer doesn't have this chunk then it ignores the GETCHUNK msg
 			if(!Files.hasChunk(ck)) {
-				System.out.println("PROTOCOL: Ignored GETCHUNK");
+				System.out.println("PROTOCOL: Ignored GETCHUNK\n--------------------");
 				return;
 			}
 
 			// wait between 0 and 400ms and send CHUNK if needed
 			Thread.sleep(random.nextInt(400));
-			
+
 			if(!MDR.hasChunkConf(ck)) {
 				MDR.addChunkConfirm(ck);
 				Chunk chunk = Files.getChunk(ck);
 				sendCHUNK(PeerService.getLocalPeer(), chunk);
 			}
-			else System.out.println("PROTOCOL: Decided not to send a CHUNK");
+			else System.out.println("PROTOCOL: Decided not to send a CHUNK\n--------------------");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -195,12 +212,12 @@ public class Protocol {
 
 		Messenger.sendToMDR(packet);
 
-		System.out.println("PROTOCOL: sent a CHUNK to MDR");		
+		System.out.println("PROTOCOL: sent a CHUNK to MDR\n--------------------");		
 	}
 
 	public static void handleCHUNK(DatagramPacket msg, Peer sender) {
 		System.out.println("MDR: received a CHUNK");
-		
+
 		try {
 			byte[] body = MulticastChannel.extractBody(msg);
 			String[] msg_tokens = MulticastChannel.msgTokens;
@@ -217,6 +234,33 @@ public class Protocol {
 			ChunkKey chunkKey = new ChunkKey(chunkNo, fileID);
 			MDR.addChunkConfirm(chunkKey);
 
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static void sendDELETE(Peer sender, String fileID) throws Exception {
+		String header = "DELETE" + " " + VERSION +
+				" " + sender.get_ip() +
+				" " + fileID +
+				" " + CRLF + CRLF;
+
+		byte[] packet = MulticastChannel.readyPacket(header.getBytes(), "".getBytes());
+
+		Messenger.sendToMC(packet);
+
+		System.out.println("PROTOCOL: sent a DELETE to MC");	
+	}
+
+	public static void handleDELETE(DatagramPacket msg, Peer sender) {
+		System.out.println("MC: received a DELETE");
+		
+		try {
+			String[] msg_tokens = MulticastChannel.msgTokens;
+			String fileID = msg_tokens[3];
+			
+			Files.deleteSavedChunksFrom(fileID);
+						
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

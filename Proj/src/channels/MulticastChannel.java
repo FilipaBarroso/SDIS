@@ -61,6 +61,7 @@ public abstract class MulticastChannel {
 			Protocol.handleCHUNK(msg, sender);
 			break;
 		case "DELETE":
+			Protocol.handleDELETE(msg, sender);
 			break;
 		default:
 			break;

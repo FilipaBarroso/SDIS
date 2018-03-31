@@ -20,7 +20,7 @@ public class Files {
 	public static String FILE_PATH = "FILES/";
 	public static String RESTORED_FILES_PATH = "RESTORED_FILES/";
 	public static String RESTORED_CHUNKS_PATH = "RESTORED_CHUNKS/";
-	public static String CHUNKS_PATH = "CHUNKS/";
+	public static String CHUNKS_PATH = "SAVED_CHUNKS/";
 
 	public static String getFileID(File file) {
 		String file_metadata = file.getName() + file.lastModified() + PeerService.getLocalPeer().get_ip();
@@ -62,7 +62,8 @@ public class Files {
 		return fileData;
 	}
 
-	public static void loadChunks(Chunk[] tmp_chunkArray, String filename, String fileID) throws FileNotFoundException {
+	/*
+	public static void storeRestoredChunks(Chunk[] tmp_chunkArray, String filename, String fileID) throws FileNotFoundException {
 		// create folder for these CHUNKS
 		String path = RESTORED_CHUNKS_PATH + filename;
 		File dir = new File(path);
@@ -83,7 +84,7 @@ public class Files {
 		int i;
 		for(i=0; i < chunkArray.length; i++) {
 			try {
-				FileOutputStream chunkStream = new FileOutputStream(path + "/" +  chunkArray[i].getNo());
+				FileOutputStream chunkStream = new FileOutputStream(path + "/" + fileID + "-" + chunkArray[i].getNo());
 				chunkStream.write(chunkArray[i].getData());
 				chunkStream.close();
 			} catch (Exception e) {
@@ -94,6 +95,7 @@ public class Files {
 
 		System.out.println("FILES: Chunks saved locally");
 	}
+	*/
 
 	public static boolean hasChunk(ChunkKey chunk) {
 		File chunksFolder = new File(CHUNKS_PATH);
@@ -112,7 +114,7 @@ public class Files {
 		File chunkFile = new File(CHUNKS_PATH + "/" + chunk.getFileID() + "-" + chunk.getChunkNo());
 		if(chunkFile.exists() && chunkFile.isFile()) {
 			FileInputStream instream = new FileInputStream(CHUNKS_PATH + "/" + chunk.getFileID() + "-" + chunk.getChunkNo());
-			
+
 			byte[] body = new byte[(int) chunkFile.length()];
 			instream.read(body, 0 , body.length);
 			instream.close();
@@ -172,5 +174,40 @@ public class Files {
 			e.printStackTrace();
 		}
 		System.out.println("FILES: File restored");
+	}
+
+	public static void deleteRestoredFile(String filename) {
+		String path = RESTORED_FILES_PATH + filename;
+		File file = new File(path);
+		if(file.exists() && file.isFile()) {
+			file.delete();
+			System.out.println("FILES: Deleted a file");
+		}
+		
+		File rest = new File(RESTORED_FILES_PATH);
+		if(rest.listFiles().length == 0)
+			rest.delete();
+	}
+
+	public static void deleteSavedChunksFrom(String fileID) {
+		File chunksFolder = new File(CHUNKS_PATH);
+		if(chunksFolder.exists() && chunksFolder.isDirectory()) {
+			File[] saved_chunks = chunksFolder.listFiles();
+
+			// percorrer todos os chunks guardados, deletar os chunks que pertencem ao ficheiro de fileID
+			int i;
+			for(i = 0; i < saved_chunks.length; i++) {
+				if(saved_chunks[i].getName().contains(fileID)) {
+					File chunkfile = new File(saved_chunks[i].getPath());
+					if(chunkfile.exists() && chunkfile.isFile()) {
+						chunkfile.delete();
+						System.out.println("FILES: Deleted a chunk");
+					}
+				}
+			}
+		}
+		
+		if(chunksFolder.listFiles().length == 0)
+			chunksFolder.delete();
 	}
 }

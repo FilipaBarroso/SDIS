@@ -111,7 +111,7 @@ public class Backup implements Runnable {
 			
 			System.out.print("BACKUP: Saved chunk");
 			if(num_tries < 5) System.out.print(" with a desirable replication degree");
-			System.out.print("\n--------------------");
+			System.out.println("\n--------------------");
 			
 			MC.deleteStoredConfs(ck);
 		}
