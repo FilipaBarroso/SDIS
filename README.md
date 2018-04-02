@@ -1,9 +1,9 @@
-$ HOW TO COMPILE
+HOW TO COMPILE
 
 In src folder, enter:
 javac -cp . service/*.java channels/*.java data/*.java database/*.java protocol/*.java
 
-$ HOW TO RUN
+HOW TO RUN
 
 As a peer, enter in src folder:
 java service/PeerService <IP-address> <port-number>
