@@ -12,12 +12,13 @@ import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
+import protocol.Protocol;
 import channels.MC;
 import channels.MDB;
 import channels.MDR;
 import channels.Messenger;
-import database.Database;
 import data.Storage;
+import database.Database;
 
 public class PeerService {
 
@@ -28,7 +29,7 @@ public class PeerService {
 	private static volatile Database database;
 	private static final String DATABASE_STRING = "database.data";
 	private static File db;
-	
+
 	private static Storage storage;
 	private static final String STORAGE_STRING = "storage.data";
 	private static File st;
@@ -37,16 +38,25 @@ public class PeerService {
 	private static volatile MDB mdbThread;
 	private static volatile MDR mdrThread;
 
+	private static boolean isClient = false;
+
 	public static String defaultServer = "225.0.0.0";
+	public static int default_PeerPort = 0;
 	public static int default_MCport = 1, default_MDBport = 2, default_MDRport = 3;
 
 	public static void main(String args[]) throws Exception {
 		// check whether args are empty or there's channel configs / a command 
-		System.out.println("STARTED PEER SERVICE \n");
+		System.out.println("STARTED PEER SERVICE\n");
 
-		socket = new MulticastSocket();
+		if(args.length < 2) {
+			System.err.println("ERROR: Must call this application with at least <IP-address> <port-number>");
+		}
+		defaultServer = args[0];
+		default_PeerPort = Integer.parseInt(args[1]);
+
+		socket = new MulticastSocket(default_PeerPort);
+
 		localPeer = new Peer(getPeerAddr(), socket.getLocalPort());
-
 
 		//	Multicast Channels threads
 		mcThread = new MC(InetAddress.getByName(defaultServer), default_MCport, localPeer.get_ip());
@@ -56,21 +66,50 @@ public class PeerService {
 		mdrThread = new MDR(InetAddress.getByName(defaultServer), default_MDRport, localPeer.get_ip());
 		new Thread(mdrThread).start();
 
-		Messenger messenger = new Messenger(socket, localPeer, InetAddress.getByName(defaultServer));
-		new Thread(messenger).start();
 
+		// dont start Messenger if it's not a client
+		if(args.length > 2) {
+			Messenger messenger = new Messenger(socket, localPeer, InetAddress.getByName(defaultServer));
+			new Thread(messenger).start();
+		}
 
 		db = new File(DATABASE_STRING);
 		if(!db.exists()) 
 			createDatabase();
 		else 
 			loadDatabase();
-		
+
 		st = new File (STORAGE_STRING);
 		if(!st.exists())
 			createStorage();
 		else
 			loadStorage();
+
+		if(args.length > 2)
+			InterpretArgs(args);
+	}
+	
+	public static void InterpretArgs(String[] args) {
+		switch(args[2]) {
+		case "BACKUP":
+			if(args.length != 4)
+				System.err.println("ERROR: Wrong number of args for BACKUP protocol. Try <BACKUP> <filename> <replication degree>");
+			else
+				Protocol.initiateBackup(args[3], Integer.parseInt(args[4]));
+			break;
+		case "RESTORE":
+			if(args.length != 3)
+				System.err.println("ERROR: Wrong number of args for RESTORE protocol. Try <RESTORE> <filename>");
+			else
+				Protocol.initiateRestore(args[3]);
+			break;
+		case "DELETE":
+			if(args.length != 3)
+				System.err.println("ERROR: Wrong number of args for DELETE protocol. Try <DELETE> <filename>");
+			else
+				Protocol.initiateDelete(args[3]);
+			break;
+		}
 	}
 
 	public static Peer getLocalPeer() {
@@ -108,7 +147,7 @@ public class PeerService {
 
 	private static void createDatabase(){
 		database = new Database();
-		
+
 		saveDatabase();
 	}
 
@@ -145,10 +184,10 @@ public class PeerService {
 			e.printStackTrace();
 		}
 	}
-	
+
 	private static void createStorage(){
 		storage = new Storage();
-		
+
 		saveStorage();
 	}
 
@@ -161,13 +200,14 @@ public class PeerService {
 
 			objectOutputStream.close();
 		} catch (FileNotFoundException e) {
-			System.out.println("Storage Not Found");
+			System.err.println("ERROR: Storage Not Found");
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		System.out.println("STORAGE: current local storage = " + Storage.getFreeStorage());
 	}
-	
+
 	private static void loadStorage() throws ClassNotFoundException, IOException {
 		try {
 			FileInputStream fileInputStream = new FileInputStream(STORAGE_STRING);
@@ -181,7 +221,7 @@ public class PeerService {
 
 		}
 	}
-	
-	
-	
+
+
+
 }

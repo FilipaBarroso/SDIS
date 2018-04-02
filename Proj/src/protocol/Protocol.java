@@ -15,6 +15,7 @@ import channels.MDR;
 import channels.Messenger;
 import channels.MulticastChannel;
 import data.Files;
+import data.Storage;
 import database.ChunkKey;
 import database.FileDetails;
 import service.Chunk;
@@ -110,8 +111,9 @@ public class Protocol {
 			// else wait between 0 and 400ms and send STORED confirmation if needed
 			else {
 				Thread.sleep(random.nextInt(400));
-
-				if(MC.getNumStoredConfs(ck) < repD) {
+				
+				// add file only if there's space for it and if needed
+				if(MC.getNumStoredConfs(ck) < repD && Storage.addFile(body.length)) {
 					Files.storeChunk(chunk);
 					Protocol.sendSTORED(PeerService.getLocalPeer(), chunk);
 				}
@@ -259,8 +261,8 @@ public class Protocol {
 			String[] msg_tokens = MulticastChannel.msgTokens;
 			String fileID = msg_tokens[3];
 			
-			Files.deleteSavedChunksFrom(fileID);
-						
+			int removed_space = Files.deleteSavedChunksFrom(fileID);
+			Storage.removeFile(removed_space);			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

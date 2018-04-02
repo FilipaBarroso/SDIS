@@ -6,11 +6,11 @@ import service.PeerService;
 public class Storage implements Serializable{
 	private static final long serialVersionUID = 3L;
 	
-	//10 GB
-	private static final int DEFAULT_STORAGE = 10485760;
+	//1000 Bytes
+	private static final int DEFAULT_STORAGE = 1000;
 	
-	private int totalStorage;
-	private int usedStorage;
+	private static int totalStorage;
+	private static int usedStorage;
 	
 	public Storage(){
 		this.totalStorage=DEFAULT_STORAGE;
@@ -21,8 +21,8 @@ public class Storage implements Serializable{
 		return totalStorage;
 	}
 
-	public synchronized void setTotalStorage(int totalStorage) {
-		this.totalStorage = totalStorage;
+	public synchronized void setTotalStorage(int ts) {
+		totalStorage = ts;
 		
 		PeerService.saveStorage();
 	}
@@ -31,11 +31,11 @@ public class Storage implements Serializable{
 		return usedStorage;
 	}
 	
-	public synchronized void setUsedStorage(int usedStorage) {
-		this.usedStorage = usedStorage;
+	public synchronized static void setUsedStorage(int us) {
+		usedStorage = us;
 	}
 
-	public synchronized int getFreeStorage(){
+	public synchronized static int getFreeStorage(){
 		return totalStorage - usedStorage;
 	}
 	
@@ -44,25 +44,24 @@ public class Storage implements Serializable{
 		setTotalStorage(newStorage);
 	}
 	
-	public synchronized void addFile(int fileSize){
+	public synchronized static boolean addFile(int fileSize){
 		if(fileSize <= getFreeStorage()){
 			int newUsedStorage = usedStorage + fileSize;
 			
 			setUsedStorage(newUsedStorage);
 			PeerService.saveStorage();
-			
+			return true;
 		}
 		else{
-			System.out.println("Not enough storage for this file");
+			System.out.println("STORAGE: Not enough local space for this file");
+			return false;
 		}
 	}
 	
-	public synchronized void removeFile(int fileSize){
+	public synchronized static void removeFile(int fileSize){
 		int newUsedStorage = usedStorage - fileSize;
 		setUsedStorage(newUsedStorage);
 		
 		PeerService.saveStorage();
 	}
-	
-	
 }

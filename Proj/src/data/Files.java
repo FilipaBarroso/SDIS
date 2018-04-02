@@ -189,7 +189,8 @@ public class Files {
 			rest.delete();
 	}
 
-	public static void deleteSavedChunksFrom(String fileID) {
+	public static int deleteSavedChunksFrom(String fileID) {
+		int size_counter = 0;
 		File chunksFolder = new File(CHUNKS_PATH);
 		if(chunksFolder.exists() && chunksFolder.isDirectory()) {
 			File[] saved_chunks = chunksFolder.listFiles();
@@ -200,6 +201,7 @@ public class Files {
 				if(saved_chunks[i].getName().contains(fileID)) {
 					File chunkfile = new File(saved_chunks[i].getPath());
 					if(chunkfile.exists() && chunkfile.isFile()) {
+						size_counter += chunkfile.length();
 						chunkfile.delete();
 						System.out.println("FILES: Deleted a chunk");
 					}
@@ -209,5 +211,7 @@ public class Files {
 		
 		if(chunksFolder.listFiles().length == 0)
 			chunksFolder.delete();
+	
+		return size_counter;
 	}
 }
