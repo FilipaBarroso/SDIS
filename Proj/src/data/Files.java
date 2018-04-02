@@ -17,10 +17,10 @@ import service.PeerService;
 
 public class Files {
 
-	public static String FILE_PATH = "FILES/";
-	public static String RESTORED_FILES_PATH = "RESTORED_FILES/";
-	public static String RESTORED_CHUNKS_PATH = "RESTORED_CHUNKS/";
-	public static String CHUNKS_PATH = "SAVED_CHUNKS/";
+	public static String FILE_PATH = "../FILES/";
+	public static String RESTORED_FILES_PATH = "../RESTORED_FILES/";
+	public static String RESTORED_CHUNKS_PATH = "../RESTORED_CHUNKS/";
+	public static String CHUNKS_PATH = "../SAVED_CHUNKS/";
 
 	public static String getFileID(File file) {
 		String file_metadata = file.getName() + file.lastModified() + PeerService.getLocalPeer().get_ip();
@@ -47,6 +47,7 @@ public class Files {
 	}
 
 	public static byte[] getFileData(File file) throws FileNotFoundException {
+		File f = new File(file.getPath());
 		FileInputStream fileStream = new FileInputStream(file);
 
 

@@ -44,12 +44,13 @@ public class PeerService {
 	public static int default_PeerPort = 8000;
 	public static int default_MCport = 8001, default_MDBport = 8002, default_MDRport = 8003;
 
-	public static void main(String args[]) throws Exception {
+	public static void main(String args[]) throws Exception {		
 		// check whether args are empty
 		if(args.length < 2) {
 			System.err.println("ERROR: Must call this application with at least <IP-address> <port-number>");
 			return;
 		}
+		
 		defaultServer = args[0];
 		default_PeerPort = Integer.parseInt(args[1]);
 		
@@ -67,13 +68,10 @@ public class PeerService {
 		localPeer = new Peer(getPeerAddr(), socket.getLocalPort());
 
 		
-		// dont start Messenger if it's not a client
-		if(args.length > 2) {
+		System.out.println("\nSTARTED PEER SERVICE");
+
 			Messenger messenger = new Messenger(socket, localPeer, InetAddress.getByName(defaultServer));
 			new Thread(messenger).start();
-		}
-		else
-			System.out.println("\nSTARTED PEER SERVICE\n");
 		
 		
 		//	Multicast Channels threads
@@ -104,22 +102,25 @@ public class PeerService {
 	public static void InterpretArgs(String[] args) {
 		switch(args[2]) {
 		case "BACKUP":
-			if(args.length != 4)
+			if(args.length != 5)
 				System.err.println("ERROR: Wrong number of args for BACKUP protocol. Try <BACKUP> <filename> <replication degree>");
 			else
 				Protocol.initiateBackup(args[3], Integer.parseInt(args[4]));
 			break;
 		case "RESTORE":
-			if(args.length != 3)
+			if(args.length != 4)
 				System.err.println("ERROR: Wrong number of args for RESTORE protocol. Try <RESTORE> <filename>");
 			else
 				Protocol.initiateRestore(args[3]);
 			break;
 		case "DELETE":
-			if(args.length != 3)
+			if(args.length != 4)
 				System.err.println("ERROR: Wrong number of args for DELETE protocol. Try <DELETE> <filename>");
 			else
 				Protocol.initiateDelete(args[3]);
+			break;
+		default:
+			System.out.println("Protocol " + args[2] + " does not exist\n");
 			break;
 		}
 	}

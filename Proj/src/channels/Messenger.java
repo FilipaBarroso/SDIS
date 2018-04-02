@@ -29,8 +29,8 @@ public class Messenger implements Runnable {
 		this.socket = socket;
 		this.server = server;
 
-		System.out.println("MESSENGER: Login from peer " + localPeer.get_ip() + ":" + localPeer.get_port());
-		System.out.println("MESSENGER: You can choose to backup, restore or delete a file");
+		System.out.println("\nMESSENGER: Login from peer " + localPeer.get_ip() + ":" + localPeer.get_port());
+		System.out.println("MESSENGER: You can choose to backup, restore or delete a file\n");
 	}
 
 	public void run() {
