@@ -72,7 +72,7 @@ public abstract class MulticastChannel {
 		ByteArrayInputStream stream = new ByteArrayInputStream(msg.getData());
 		BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
 
-		// ler a msg até encontrar o CRLF
+		// ler a msg ate encontrar o CRLF
 		String line = null;
 		int headerBytes = 0;
 		do {

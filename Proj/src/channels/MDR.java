@@ -39,7 +39,7 @@ public class MDR extends MulticastChannel implements Runnable {
 	}
 
 	public void run() {
-		System.out.println("MDR: THREAD BOOTED IN " + getIp() + ":" + getPort());
+		System.out.println("MDR: CHANNEL BOOTED IN " + getIp() + ":" + getPort());
 
 		while(true) {
 			try {

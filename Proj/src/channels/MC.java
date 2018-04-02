@@ -39,7 +39,7 @@ public class MC extends MulticastChannel implements Runnable {
 	}
 
 	public void run() {
-		System.out.println("MC: THREAD BOOTED IN " + getIp() + ":" + getPort());
+		System.out.println("MC: CHANNEL BOOTED IN " + getIp() + ":" + getPort());
 		
 		while(true) {
 			try {

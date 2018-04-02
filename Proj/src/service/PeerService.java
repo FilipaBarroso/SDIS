@@ -41,23 +41,41 @@ public class PeerService {
 	private static boolean isClient = false;
 
 	public static String defaultServer = "225.0.0.0";
-	public static int default_PeerPort = 0;
-	public static int default_MCport = 1, default_MDBport = 2, default_MDRport = 3;
+	public static int default_PeerPort = 8000;
+	public static int default_MCport = 8001, default_MDBport = 8002, default_MDRport = 8003;
 
 	public static void main(String args[]) throws Exception {
-		// check whether args are empty or there's channel configs / a command 
-		System.out.println("STARTED PEER SERVICE\n");
-
+		// check whether args are empty
 		if(args.length < 2) {
 			System.err.println("ERROR: Must call this application with at least <IP-address> <port-number>");
+			return;
 		}
 		defaultServer = args[0];
 		default_PeerPort = Integer.parseInt(args[1]);
+		
+		if(default_PeerPort < 1024) {
+			System.err.println("ERROR: Port number can't be below 1024");
+			return;
+		}
+		
+		if(default_PeerPort == default_MCport || default_PeerPort == default_MDBport || default_PeerPort == default_MDRport) {
+			System.err.println("ERROR: Port number is already taken");
+			return;
+		}
 
 		socket = new MulticastSocket(default_PeerPort);
-
 		localPeer = new Peer(getPeerAddr(), socket.getLocalPort());
 
+		
+		// dont start Messenger if it's not a client
+		if(args.length > 2) {
+			Messenger messenger = new Messenger(socket, localPeer, InetAddress.getByName(defaultServer));
+			new Thread(messenger).start();
+		}
+		else
+			System.out.println("\nSTARTED PEER SERVICE\n");
+		
+		
 		//	Multicast Channels threads
 		mcThread = new MC(InetAddress.getByName(defaultServer), default_MCport, localPeer.get_ip());
 		new Thread(mcThread).start();
@@ -66,13 +84,7 @@ public class PeerService {
 		mdrThread = new MDR(InetAddress.getByName(defaultServer), default_MDRport, localPeer.get_ip());
 		new Thread(mdrThread).start();
 
-
-		// dont start Messenger if it's not a client
-		if(args.length > 2) {
-			Messenger messenger = new Messenger(socket, localPeer, InetAddress.getByName(defaultServer));
-			new Thread(messenger).start();
-		}
-
+		
 		db = new File(DATABASE_STRING);
 		if(!db.exists()) 
 			createDatabase();
@@ -205,7 +217,7 @@ public class PeerService {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		System.out.println("STORAGE: current local storage = " + Storage.getFreeStorage());
+		System.out.println("STORAGE: current local storage = " + Storage.getFreeStorage() + "bytes");
 	}
 
 	private static void loadStorage() throws ClassNotFoundException, IOException {

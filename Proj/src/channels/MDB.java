@@ -33,7 +33,7 @@ public class MDB extends MulticastChannel implements Runnable {
 	}
 
 	public void run() {
-		System.out.println("MDB: THREAD BOOTED IN " + getIp() + ":" + getPort());
+		System.out.println("MDB: CHANNEL BOOTED IN " + getIp() + ":" + getPort());
 
 		while(true) {
 			try {
