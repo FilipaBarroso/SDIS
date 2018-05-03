@@ -14,7 +14,7 @@ public class Chain {
 		Chain.setChain(new ArrayList<Block>());
 		
 		// adds an empty block so the chain isn't empty
-		Block genesis_block = new Block(new Data(), "0");
+		Block genesis_block = new Block(new Transaction(), "0");
 		blockchain.add(genesis_block);
 	}
 
