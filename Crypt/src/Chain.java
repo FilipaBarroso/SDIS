@@ -4,7 +4,6 @@ import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.util.ArrayList;
 import java.util.Random;
-
 import com.google.gson.*;
 
 public class Chain {
@@ -28,7 +27,13 @@ public class Chain {
 	}
 
 	public void add(Block b) {
+		Cryptocoin.mineBlock(b);
+		
 		Chain.blockchain.add(b);
+		if(!isChainValid()) {
+			System.out.println("ERROR: chain invalid\n");
+			blockchain.remove(b);
+		}
 	}
 
 	public void printChain() {
@@ -37,9 +42,33 @@ public class Chain {
 	}
 
 	public String getLastHash() { 
-		return blockchain.get(blockchain.size()).getHash();
+		return blockchain.get(blockchain.size()).hash;
 	}
 	
-	// TODO
-	public boolean verifyChain() { return true;}
+	public boolean isChainValid() { 
+		Block curr, prev;
+		int i;
+		String targetHash = new String(new char[Cryptocoin.miningDifficulty]).replace('\0', '0');
+		
+		for(i=1; i < blockchain.size(); i++) {
+			curr = blockchain.get(i);
+			prev = blockchain.get(i-1);
+			
+			if(!curr.hash.equals(curr.calculateHash())) {
+				System.out.println("ERRROR: this block is defective - " + curr.hash);
+				return false;
+			}
+			
+			if(!prev.hash.equals(curr.prevHash)) {
+				System.out.println("ERROR: this block doesn't match with the rest of the chain - " + curr.hash);
+				return false;
+			}
+			
+			if(!curr.hash.substring(0, Cryptocoin.miningDifficulty).equals(targetHash)) {
+				System.out.println("ERROR: there's a block that hasn't been mined yet");
+			}
+		}
+		
+		return true;
+	}
 }

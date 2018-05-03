@@ -13,4 +13,7 @@ public class Data {
 	public Data() {
 		
 	}
+	
+	@Override
+	public String toString() {return "temporary data";}
 }
