@@ -34,7 +34,6 @@ public class Cryptocoin {
 		// create some wallets
 		Wallet walletA = new Wallet();
 		wallets.add(walletA);
-		System.out.println();
 		Wallet walletB = new Wallet();
 		wallets.add(walletB);
 

@@ -40,7 +40,7 @@ public class Wallet {
 			total += UTXO.value;
 			inputs.add(new TransactionInput(UTXO.id));
 
-			if(total < value) break; // no need to include unnecessary inputs
+			if(total > value) break; // no need to include unnecessary inputs
 		}
 
 		Transaction newTrans = new Transaction(publicKey, recipient, value, inputs);
