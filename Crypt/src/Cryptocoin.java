@@ -7,52 +7,58 @@ import java.security.PublicKey;
 import java.security.Signature;
 import java.util.ArrayList;
 import java.util.Random;
+import java.security.Security;
+import java.security.*;
+import java.security.spec.*;
+import java.util.Base64;
+import org.bouncycastle.*;
+import com.google.gson.GsonBuilder;
 
 public class Cryptocoin {
-	
+
 	private static Chain blockchain;
 	public static int miningDifficulty = 4;
 
 	public static ArrayList<Wallet> wallets;
-	
+
 	public static void main(String args[]) throws Exception {
+
+		Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider()); 
+
 		blockchain = new Chain();
+		wallets = new ArrayList<Wallet>();
 
 		// create some wallets
 		Wallet walletA = new Wallet();
 		wallets.add(walletA);
+		System.out.println();
 		Wallet walletB = new Wallet();
 		wallets.add(walletB);
-		
-		//Test public and private keys
-		System.out.println("Private and public keys:");
-		System.out.println(walletA.getPrivateKeyString());
-		System.out.println(walletA.getPublicKeyString());
-		
+
 		//Create a test transaction from WalletA to walletB 
-		Transaction transaction = new Transaction(walletA.pubKey, walletB.pubKey, 5, null);
-		transaction.generateSignature(walletA.privKey);
-		
+		Transaction transaction = new Transaction(walletA.publicKey, walletB.publicKey, 5, null);
+		transaction.generateSignature(walletA.privateKey);
+
 		//Verify the signature works and verify it from the public key
-		System.out.print("Is signature verified: ");
+		System.out.print("\nIs signature verified: ");
 		System.out.println(transaction.verifySignature());
 	}
-	
+
 	public static void mineBlock(Block b) {
 		String target = new String(new char[miningDifficulty]).replace('\0', '0');
-		
+
 		while(!b.hash.substring(0, miningDifficulty).equals(target)) {
 			b.nonce++;
 			b.hash = b.calculateHash();
-			
+
 			// temp
 			if(b.hasBeenMined()) break;
 		}
-		
+
 		System.out.println("Block mined - " + b.hash);
 		b.setAsMined();
 	}
-	
+
 	public static String sha256(String base) {
 		try{
 			MessageDigest digest = MessageDigest.getInstance("SHA-256");
@@ -70,20 +76,36 @@ public class Cryptocoin {
 			throw new RuntimeException(ex);
 		}
 	}
-	
+
 	public static boolean verifyECDSA(PublicKey senderKey, String data, byte[] sig) {
 		boolean ret = false;
-		
+
 		try {
 			Signature ecdsa = Signature.getInstance("ECDSA", "BC");
 			ecdsa.initVerify(senderKey);
 			ecdsa.update(data.getBytes());
-			
+
 			ret = ecdsa.verify(sig);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+
 		return ret;
+	}
+
+	public static String getKeyAsString(Object obj) {
+		PublicKey tmpPubKey;
+		PrivateKey tmpPrivKey;
+
+		if(obj instanceof PublicKey) {
+			tmpPubKey = (PublicKey) obj;
+			return Base64.getEncoder().encodeToString(tmpPubKey.getEncoded());
+		}
+		else if(obj instanceof PrivateKey) {
+			tmpPrivKey =  (PrivateKey) obj;
+			return Base64.getEncoder().encodeToString(tmpPrivKey.getEncoded());
+		}
+		
+		return null;
 	}
 }

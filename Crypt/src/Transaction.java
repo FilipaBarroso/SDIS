@@ -41,15 +41,16 @@ public class Transaction {
 		// avoiding equal transactions from having the same ID
 		transaction_counter++;
 
-		transID = Cryptocoin.sha256(sender.getEncoded().toString()
-				+ recipient.getEncoded().toString()
+		transID = Cryptocoin.sha256(
+				Cryptocoin.getKeyAsString(sender)
+				+ Cryptocoin.getKeyAsString(recipient)
 				+ Float.toString(value)
 				+ transaction_counter);
 	}
 
 	public void generateSignature(PrivateKey privKey) throws Exception {
 		Signature dsa;
-		String data = sender.getEncoded().toString() + recipient.getEncoded().toString() + Float.toString(value);
+		String data = Cryptocoin.getKeyAsString(sender) + Cryptocoin.getKeyAsString(recipient) + Float.toString(value);
 
 		dsa = Signature.getInstance("ECDSA", "BC");
 		dsa.initSign(privKey);
@@ -62,7 +63,7 @@ public class Transaction {
 	}
 	
 	public boolean verifySignature() {
-		String data = sender.getEncoded().toString() + recipient.getEncoded().toString() + Float.toString(value);
+		String data = Cryptocoin.getKeyAsString(sender) + Cryptocoin.getKeyAsString(recipient) + Float.toString(value);
 		
 		return Cryptocoin.verifyECDSA(sender, data, signature);		
 	}
