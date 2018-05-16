@@ -14,7 +14,7 @@ public class Chain {
 		Chain.setChain(new ArrayList<Block>());
 		
 		// adds an empty block so the chain isn't empty
-		Block genesis_block = new Block(new Transaction(), "0");
+		Block genesis_block = new Block("0");
 		blockchain.add(genesis_block);
 	}
 
@@ -27,7 +27,7 @@ public class Chain {
 	}
 
 	public void add(Block b) {
-		Cryptocoin.mineBlock(b);
+		b.mineBlock();
 		
 		Chain.blockchain.add(b);
 		if(!isChainValid()) {
@@ -59,7 +59,7 @@ public class Chain {
 				return false;
 			}
 			
-			if(!prev.hash.equals(curr.prevHash)) {
+			if(!prev.hash.equals(curr.previousHash)) {
 				System.out.println("ERROR: this block doesn't match with the rest of the chain - " + curr.hash);
 				return false;
 			}

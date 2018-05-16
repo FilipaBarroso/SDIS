@@ -11,6 +11,7 @@ import java.security.Security;
 import java.security.*;
 import java.security.spec.*;
 import java.util.Base64;
+import java.util.HashMap;
 import org.bouncycastle.*;
 import com.google.gson.GsonBuilder;
 
@@ -18,15 +19,17 @@ public class Cryptocoin {
 
 	private static Chain blockchain;
 	public static int miningDifficulty = 4;
+	public static int minimunTransAmount = 1;
 
-	public static ArrayList<Wallet> wallets;
+	//list of all unspent transactions outputs
+	public static HashMap<String,TransactionOutput> UTXOs = new HashMap<String,TransactionOutput>();
+	public static ArrayList<Wallet> wallets = new ArrayList<Wallet>();
 
 	public static void main(String args[]) throws Exception {
 
 		Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider()); 
 
 		blockchain = new Chain();
-		wallets = new ArrayList<Wallet>();
 
 		// create some wallets
 		Wallet walletA = new Wallet();
@@ -44,19 +47,27 @@ public class Cryptocoin {
 		System.out.println(transaction.verifySignature());
 	}
 
-	public static void mineBlock(Block b) {
-		String target = new String(new char[miningDifficulty]).replace('\0', '0');
+	public static String getMerkleRoot(ArrayList<Transaction> transactions) {
+		int count = transactions.size();
 
-		while(!b.hash.substring(0, miningDifficulty).equals(target)) {
-			b.nonce++;
-			b.hash = b.calculateHash();
-
-			// temp
-			if(b.hasBeenMined()) break;
+		ArrayList<String> previousTreeLayer = new ArrayList<String>();
+		for(Transaction transaction : transactions) {
+			previousTreeLayer.add(transaction.id);
 		}
 
-		System.out.println("Block mined - " + b.hash);
-		b.setAsMined();
+		ArrayList<String> treeLayer = previousTreeLayer;
+		while(count > 1) {
+			treeLayer = new ArrayList<String>();
+			for(int i=1; i < previousTreeLayer.size(); i++) {
+				treeLayer.add(sha256(previousTreeLayer.get(i-1) + previousTreeLayer.get(i)));
+			}
+			count = treeLayer.size();
+			previousTreeLayer = treeLayer;
+		}
+
+		String merkleRoot = (treeLayer.size() == 1) ? treeLayer.get(0) : "";
+
+		return merkleRoot;
 	}
 
 	public static String sha256(String base) {
@@ -105,7 +116,7 @@ public class Cryptocoin {
 			tmpPrivKey =  (PrivateKey) obj;
 			return Base64.getEncoder().encodeToString(tmpPrivKey.getEncoded());
 		}
-		
+
 		return null;
 	}
 }

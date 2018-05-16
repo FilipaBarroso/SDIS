@@ -10,4 +10,23 @@ import java.util.Random;
 // empty for now
 public class TransactionOutput {
 
+	public String id;
+	public PublicKey recipient;
+	public float value;
+	public String parentTransID;
+	
+	public TransactionOutput(PublicKey recipient, float value, String parentTransID) {
+		this.recipient = recipient;
+		this.value = value;
+		this.parentTransID = parentTransID;
+		this.id = Cryptocoin.sha256(
+				Cryptocoin.getKeyAsString(recipient)
+				+ Float.toString(value)
+				+ parentTransID
+				);
+	}
+	
+	public boolean belongsTo(PublicKey pubK) {
+		return pubK == recipient;
+	}
 }

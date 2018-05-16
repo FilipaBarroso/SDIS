@@ -14,7 +14,7 @@ import java.util.Random;
 
 public class Transaction {
 
-	public String transID;
+	public String id;
 	public PublicKey sender, recipient;
 	public float value;
 	public byte[] signature;
@@ -33,38 +33,103 @@ public class Transaction {
 		this.recipient = recipient;
 		this.value = value;
 		this.inputs = inputs;
+	}
 
+	public boolean processTransaction() {
+
+		if(!verifySignature()) {
+			System.out.println("ERROR: transaction signature couldn't be verified");
+			return false;
+		}
+
+		// make sure transaction inputs are unspent
+		for(TransactionInput ti : inputs) {
+			ti.UTXO = Cryptocoin.UTXOs.get(ti.transOutputID);
+		}
+
+		// make sure transaction value is enough
+		if(getTotalInputs() < Cryptocoin.minimunTransAmount) {
+			System.out.println("ERROR: transaction amount is too small.. (below " + Cryptocoin.minimunTransAmount + ")");
+			return false;
+		}
+
+		// generate trans outputs
+		float leftover = getTotalInputs() - value;
 		generateTransID();
+		outputs.add(new TransactionOutput(this.recipient, value, id));
+		outputs.add(new TransactionOutput(this.sender, leftover, id));
+
+		// add outputs to unspent list
+		for(TransactionOutput to : outputs) {
+			Cryptocoin.UTXOs.put(to.id, to);
+		}
+
+		// remove inputs from unspent list (because they're being spent)
+		for(TransactionInput ti : inputs) {
+			if(ti.UTXO == null) continue;
+			Cryptocoin.UTXOs.remove(ti.UTXO.id);
+		}
+
+		return true;
+	}
+
+	//returns sum of inputs(UTXOs)
+	public float getTotalInputs() {
+		float total = 0;
+
+		for(TransactionInput ti : inputs) {
+			if(ti.UTXO == null) continue; //if Transaction can't be found skip it 
+			total += ti.UTXO.value;
+		}
+
+		return total;
+	}
+
+	//returns sum of outputs
+	public float getTotalOutputs() {
+		float total = 0;
+
+		for(TransactionOutput to : outputs) {
+			total += to.value;
+		}
+
+		return total;
 	}
 
 	public void generateTransID() {
 		// avoiding equal transactions from having the same ID
 		transaction_counter++;
 
-		transID = Cryptocoin.sha256(
+		id = Cryptocoin.sha256(
 				Cryptocoin.getKeyAsString(sender)
 				+ Cryptocoin.getKeyAsString(recipient)
 				+ Float.toString(value)
 				+ transaction_counter);
 	}
 
-	public void generateSignature(PrivateKey privKey) throws Exception {
-		Signature dsa;
-		String data = Cryptocoin.getKeyAsString(sender) + Cryptocoin.getKeyAsString(recipient) + Float.toString(value);
+	public void generateSignature(PrivateKey privKey) {
+		try {
+			Signature dsa;
+			String data = Cryptocoin.getKeyAsString(sender) + Cryptocoin.getKeyAsString(recipient) + Float.toString(value);
 
-		dsa = Signature.getInstance("ECDSA", "BC");
-		dsa.initSign(privKey);
+			dsa = Signature.getInstance("ECDSA", "BC");
 
-		byte[] strBytes = data.getBytes();
-		dsa.update(strBytes);
+			dsa.initSign(privKey);
 
-		byte[] tmp_sig = dsa.sign();
-		signature = tmp_sig;
+			byte[] strBytes = data.getBytes();
+			dsa.update(strBytes);
+
+			byte[] tmp_sig = dsa.sign();
+			signature = tmp_sig;
+		} 
+		catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
-	
+
 	public boolean verifySignature() {
 		String data = Cryptocoin.getKeyAsString(sender) + Cryptocoin.getKeyAsString(recipient) + Float.toString(value);
-		
+
 		return Cryptocoin.verifyECDSA(sender, data, signature);		
 	}
 }
