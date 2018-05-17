@@ -31,19 +31,35 @@ public class Cryptocoin {
 
 		blockchain = new Chain();
 
-		// create some wallets
+		/* debugging */
 		Wallet walletA = new Wallet();
 		wallets.add(walletA);
 		Wallet walletB = new Wallet();
 		wallets.add(walletB);
 
-		//Create a test transaction from WalletA to walletB 
-		Transaction transaction = new Transaction(walletA.publicKey, walletB.publicKey, 5, null);
-		transaction.generateSignature(walletA.privateKey);
-
-		//Verify the signature works and verify it from the public key
-		System.out.print("\nIs signature verified: ");
-		System.out.println(transaction.verifySignature());
+		Block block1 = new Block(blockchain.genesis_block.hash);
+		block1.addTransaction(blockchain.bank.sendFunds(walletA.publicKey, 100f));
+		System.out.println("WalletA's balance is: " + walletA.getBalance());
+		System.out.println("WalletB's balance is: " + walletB.getBalance());
+		System.out.println("\nWalletA is attempting to send funds (40) to WalletB...");
+		block1.addTransaction(walletA.sendFunds(walletB.publicKey, 40f));
+		blockchain.add(block1);
+		System.out.println("\nWalletA's balance is: " + walletA.getBalance());
+		System.out.println("WalletB's balance is: " + walletB.getBalance());
+		
+		Block block2 = new Block(block1.hash);
+		System.out.println("\nWalletA is attempting to send more funds (1000) than it has...");
+		block2.addTransaction(walletA.sendFunds(walletB.publicKey, 1000f));
+		blockchain.add(block2);
+		System.out.println("\nWalletA's balance is: " + walletA.getBalance());
+		System.out.println("WalletB's balance is: " + walletB.getBalance());
+		
+		Block block3 = new Block(block2.hash);
+		System.out.println("\nWalletB is attempting to send funds (20) to WalletA...");
+		block3.addTransaction(walletB.sendFunds( walletA.publicKey, 20));
+		blockchain.add(block3);
+		System.out.println("\nWalletA's balance is: " + walletA.getBalance());
+		System.out.println("WalletB's balance is: " + walletB.getBalance());
 	}
 
 	public static String getMerkleRoot(ArrayList<Transaction> transactions) {

@@ -38,7 +38,7 @@ public class Transaction {
 	public boolean processTransaction() {
 
 		if(!verifySignature()) {
-			System.out.println("ERROR: transaction signature couldn't be verified");
+			System.out.println("TRANSACTION ERROR: transaction signature couldn't be verified");
 			return false;
 		}
 
@@ -49,7 +49,7 @@ public class Transaction {
 
 		// make sure transaction value is enough
 		if(getTotalInputs() < Cryptocoin.minimunTransAmount) {
-			System.out.println("ERROR: transaction amount is too small.. (below " + Cryptocoin.minimunTransAmount + ")");
+			System.out.println("TRANSACTION ERROR: transaction amount is too small.. (below " + Cryptocoin.minimunTransAmount + ")");
 			return false;
 		}
 

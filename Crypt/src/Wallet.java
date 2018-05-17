@@ -28,7 +28,7 @@ public class Wallet {
 	
 	public Transaction sendFunds(PublicKey recipient, float value) {
 		if(getBalance() < value) {
-			System.out.println("ERROR: insuficient funds");
+			System.out.println("WALLET ERROR: insuficient funds");
 			return null;
 		}
 		

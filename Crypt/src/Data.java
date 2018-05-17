@@ -6,7 +6,7 @@ import java.security.MessageDigest;
 import java.util.Random;
 
 /*
- * TODO: figure out what kind of data to have
+ * TODO: delete this class lol
  */
 public class Data {
 	
