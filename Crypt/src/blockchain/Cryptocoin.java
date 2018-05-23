@@ -1,4 +1,4 @@
-package cryptocoin;
+package blockchain;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -17,6 +17,8 @@ import java.util.HashMap;
 import org.bouncycastle.*;
 import com.google.gson.GsonBuilder;
 
+import peer2peer.Server;
+
 public class Cryptocoin {
 
 	private static Chain blockchain;
@@ -27,12 +29,28 @@ public class Cryptocoin {
 	public static HashMap<String,TransactionOutput> UTXOs = new HashMap<String,TransactionOutput>();
 	public static ArrayList<Wallet> wallets = new ArrayList<Wallet>();
 
+	// server related variables
+	public static InetAddress server_address;
+	public static String server_name = "225.0.0.0";
+	public static int server_port = 8000;
+	private static volatile Server server; 
+	
 	public static void main(String args[]) throws Exception {
 
 		Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider()); 
 
+		server_address = InetAddress.getByName(server_name);
+		
+		/* --------------------------------------------*/
+		// if no args, create new blockchain
 		blockchain = new Chain();
-
+		server = new Server(server_address, server_port);
+		new Thread(server).start();
+		
+		// else, arg is the user_name
+		// if the user with user_name arg doesn't belong to an existing wallet, create new one and thread(user).start()
+		// if it exists, thread(wallet.owner).start()
+		
 		/* debugging */
 		Wallet walletA = new Wallet();
 		wallets.add(walletA);

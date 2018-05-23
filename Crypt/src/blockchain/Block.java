@@ -1,4 +1,4 @@
-package cryptocoin;
+package blockchain;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -17,22 +17,30 @@ public class Block {
 	public ArrayList<Transaction> transaction_list = new ArrayList<Transaction>();
 	private long timestamp;
 	public int nonce = 0;
+	public static boolean mined;
 
 	public Block(String prevHash) {
 		this.previousHash = prevHash;
 		this.setTimestamp(new Date().getTime());
 		this.hash = calculateHash();
+		mined = false;
 	}
 
-	public void mineBlock() {
+	public void mineBlock(Wallet w) {
 		merkleRoot = Cryptocoin.getMerkleRoot(transaction_list);
 		String target = new String(new char[Cryptocoin.miningDifficulty]).replace('\0', '0');
 
 		while(!hash.substring(0, Cryptocoin.miningDifficulty).equals(target)) {
 			nonce++;
 			hash = calculateHash();
+			if(mined) break;
 		}
-
+		
+		if(!mined) {
+			mined = true;
+			Chain.giveMiningReward(w, hash);
+		}
+		
 		System.out.println("Block mined with the hash: " + hash);
 	}
 	

@@ -1,10 +1,13 @@
-package cryptocoin;
+package blockchain;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.util.Random;
+
+import peer2peer.User;
+
 import java.security.*;
 import java.security.spec.*;
 import java.util.ArrayList;
@@ -15,7 +18,8 @@ import java.util.Map;
 public class Wallet {
 
 	public PrivateKey privateKey;
-	public PublicKey publicKey;	
+	public PublicKey publicKey;
+	public User owner;
 	
 	// contains all unspent outputs from this wallet aka its balance
 	public HashMap<String,TransactionOutput> WalletUTXOs = new HashMap<String,TransactionOutput>();
@@ -26,6 +30,14 @@ public class Wallet {
 		// debugging
 		//System.out.println(this.toString() + " private key: " + getPrivateKeyString());
 		//System.out.println(this.toString() + " public key: " + getPublicKeyString());
+	}
+	
+	public boolean belongsTo(String user_name) {
+		return owner.user_name.equals(user_name);
+	}
+
+	public void mine(Block b) {
+		b.mineBlock(this);
 	}
 	
 	public Transaction sendFunds(PublicKey recipient, float value) {

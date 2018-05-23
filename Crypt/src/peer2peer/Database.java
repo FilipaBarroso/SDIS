@@ -9,7 +9,7 @@ import java.util.Random;
 
 /*
  * maintains the blockchain stored
- * check last proj's database
+ * existing users and their wallets
  */
 public class Database {
 	

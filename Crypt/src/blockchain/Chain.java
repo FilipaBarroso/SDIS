@@ -1,4 +1,4 @@
-package cryptocoin;
+package blockchain;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -15,7 +15,9 @@ public class Chain {
 	private static ArrayList<Block> blockchain;
 	public Transaction genesisTransaction;
 	public Block genesis_block;
-	public Wallet bank;
+	public static Wallet bank;
+	public static float miningReward = 1f;
+	public static Block currentBlock; // this block is always the one next to be added. It's created after the current one is mined and added to the chain
 	
 	public Chain() {
 		Chain.setChain(new ArrayList<Block>());
@@ -35,8 +37,13 @@ public class Chain {
 
 		genesis_block.addTransaction(genesisTransaction);
 		blockchain.add(genesis_block);
+		currentBlock = new Block(genesis_block.previousHash);
 	}
 
+	public static Block getCurrentBlock() {
+		return currentBlock;
+	}
+	
 	public static ArrayList<Block> getChain() {
 		return blockchain;
 	}
@@ -45,8 +52,13 @@ public class Chain {
 		Chain.blockchain = blockchain;
 	}
 
+	// have all existing users mining the block TODO seperately
+	// whoever mines it first gets a reward
 	public void add(Block b) {
-		b.mineBlock();
+		for(Wallet w : Cryptocoin.wallets) {
+			// TODO call this in a thread
+			w.mine(b);
+		}
 		
 		Chain.blockchain.add(b);
 		if(!isChainValid()) {
@@ -55,6 +67,11 @@ public class Chain {
 		}
 	}
 
+	public static void giveMiningReward(Wallet w, String prevHash) {
+		currentBlock = new Block(prevHash);
+		currentBlock.addTransaction(bank.sendFunds(w.publicKey, miningReward));
+	}
+	
 	public void printChain() {
 		String blockchainJson = new GsonBuilder().setPrettyPrinting().create().toJson(blockchain);		
 		System.out.println(blockchainJson);
