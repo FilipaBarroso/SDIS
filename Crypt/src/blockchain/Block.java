@@ -53,6 +53,10 @@ public class Block {
 		
 		transaction_list.add(trans);
 		
+		// each block gets added to the chain to be mined after 3 transactions
+		if(transaction_list.size() >= 3)
+			Cryptocoin.getBlockchain().add(this);
+		
 		return true;
 	}
 	

@@ -13,10 +13,11 @@ import com.google.gson.*;
 public class Chain {
 	
 	private static ArrayList<Block> blockchain;
-	public Transaction genesisTransaction;
-	public Block genesis_block;
+	public static Transaction genesisTransaction;
+	public static Block genesis_block;
 	public static Wallet bank;
 	public static float miningReward = 1f;
+	public static float bankFunds = 1000000000f;
 	public static Block currentBlock; // this block is always the one next to be added. It's created after the current one is mined and added to the chain
 	
 	public Chain() {
@@ -29,7 +30,7 @@ public class Chain {
 		Wallet genesisWallet = new Wallet();
 		
 		// create genesis transaction, which fills the bank up 
-		genesisTransaction = new Transaction(genesisWallet.publicKey, bank.publicKey, 100000000f, null);
+		genesisTransaction = new Transaction(genesisWallet.publicKey, bank.publicKey, bankFunds, null);
 		genesisTransaction.generateSignature(genesisWallet.privateKey);	 //manually sign the genesis transaction	
 		genesisTransaction.id = "0"; //manually set the transaction id
 		genesisTransaction.outputs.add(new TransactionOutput(genesisTransaction.recipient, genesisTransaction.value, genesisTransaction.id)); //manually add the Transactions Output
@@ -38,10 +39,6 @@ public class Chain {
 		genesis_block.addTransaction(genesisTransaction);
 		blockchain.add(genesis_block);
 		currentBlock = new Block(genesis_block.previousHash);
-	}
-
-	public static Block getCurrentBlock() {
-		return currentBlock;
 	}
 	
 	public static ArrayList<Block> getChain() {
@@ -68,6 +65,7 @@ public class Chain {
 	}
 
 	public static void giveMiningReward(Wallet w, String prevHash) {
+		// create a new block, to store this new reward transaction
 		currentBlock = new Block(prevHash);
 		currentBlock.addTransaction(bank.sendFunds(w.publicKey, miningReward));
 	}

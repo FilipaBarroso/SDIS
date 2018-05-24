@@ -50,8 +50,8 @@ public class Transaction {
 		}
 
 		// make sure transaction value is enough
-		if(getTotalInputs() < Cryptocoin.minimunTransAmount) {
-			System.out.println("TRANSACTION ERROR: transaction amount is too small.. (below " + Cryptocoin.minimunTransAmount + ")");
+		if(getTotalInputs() < Cryptocoin.minimunTransactionAmount) {
+			System.out.println("TRANSACTION ERROR: transaction amount is too small.. (below " + Cryptocoin.minimunTransactionAmount + ")");
 			return false;
 		}
 

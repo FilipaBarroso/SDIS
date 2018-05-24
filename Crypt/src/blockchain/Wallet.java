@@ -24,12 +24,24 @@ public class Wallet {
 	// contains all unspent outputs from this wallet aka its balance
 	public HashMap<String,TransactionOutput> WalletUTXOs = new HashMap<String,TransactionOutput>();
 	
+	// this constructor should never be used
 	public Wallet() {
+		// generate hashes
 		generateKeys();
 		
-		// debugging
-		//System.out.println(this.toString() + " private key: " + getPrivateKeyString());
-		//System.out.println(this.toString() + " public key: " + getPublicKeyString());
+		// add this wallet to the list of existing wallets
+		Cryptocoin.wallets.add(this);
+	}
+	
+	public Wallet(String username) {
+		// generate hashes
+		generateKeys();
+		
+		owner = new User(username);
+		owner.addWallet(this);
+		
+		// add this wallet to the list of existing wallets
+		Cryptocoin.wallets.add(this);
 	}
 	
 	public boolean belongsTo(String user_name) {

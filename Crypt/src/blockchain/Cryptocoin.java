@@ -18,14 +18,15 @@ import org.bouncycastle.*;
 import com.google.gson.GsonBuilder;
 
 import peer2peer.Server;
+import peer2peer.User;
 
 public class Cryptocoin {
 
 	private static Chain blockchain;
 	public static int miningDifficulty = 4;
-	public static int minimunTransAmount = 1;
+	public static int minimunTransactionAmount = 1;
 
-	//list of all unspent transactions outputs
+	//list of all unspent transactions outputs TODO save this in a database
 	public static HashMap<String,TransactionOutput> UTXOs = new HashMap<String,TransactionOutput>();
 	public static ArrayList<Wallet> wallets = new ArrayList<Wallet>();
 
@@ -33,32 +34,51 @@ public class Cryptocoin {
 	public static InetAddress server_address;
 	public static String server_name = "225.0.0.0";
 	public static int server_port = 8000;
-	private static volatile Server server; 
-	
+	private static Server server; 
+
 	public static void main(String args[]) throws Exception {
 
 		Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider()); 
 
-		server_address = InetAddress.getByName(server_name);
+		// load database
 		
-		/* --------------------------------------------*/
-		// if no args, create new blockchain
-		blockchain = new Chain();
-		server = new Server(server_address, server_port);
-		new Thread(server).start();
+		server_address = InetAddress.getByName(server_name);
+
+		/* ------------------------------------------------*/
+		/*
+		if(args.length < 1) {
+			blockchain = new Chain();
+			server = new Server(server_address, server_port);
+			new Thread(server).start();
+		}
 		
 		// else, arg is the user_name
 		// if the user with user_name arg doesn't belong to an existing wallet, create new one and thread(user).start()
 		// if it exists, thread(wallet.owner).start()
-		
-		/* debugging */
-		Wallet walletA = new Wallet();
-		wallets.add(walletA);
-		Wallet walletB = new Wallet();
-		wallets.add(walletB);
+		else if(args.length == 1) {
+			User u = null;
+			
+			for(Wallet w : wallets) {
+				if(w.owner.user_name.equals(args[0])) {
+					u = w.owner;
+				}
+			}
+			
+			if(u == null) {
+				Wallet u_wallet = new Wallet(args[0]);
+				u = u_wallet.owner;
+			}
 
-		Block block1 = new Block(blockchain.genesis_block.hash);
-		block1.addTransaction(blockchain.bank.sendFunds(walletA.publicKey, 100f));
+			new Thread(u).start();
+		}
+		*/
+		
+		/* debugging, without the if conditions */
+		Wallet walletA = new Wallet();
+		Wallet walletB = new Wallet();
+
+		Block block1 = new Block(Chain.genesis_block.hash);
+		block1.addTransaction(Chain.bank.sendFunds(walletA.publicKey, 100f));
 		System.out.println("WalletA's balance is: " + walletA.getBalance());
 		System.out.println("WalletB's balance is: " + walletB.getBalance());
 		System.out.println("\nWalletA is attempting to send funds (40) to WalletB...");
@@ -66,20 +86,21 @@ public class Cryptocoin {
 		blockchain.add(block1);
 		System.out.println("\nWalletA's balance is: " + walletA.getBalance());
 		System.out.println("WalletB's balance is: " + walletB.getBalance());
-		
+
 		Block block2 = new Block(block1.hash);
 		System.out.println("\nWalletA is attempting to send more funds (1000) than it has...");
 		block2.addTransaction(walletA.sendFunds(walletB.publicKey, 1000f));
 		blockchain.add(block2);
 		System.out.println("\nWalletA's balance is: " + walletA.getBalance());
 		System.out.println("WalletB's balance is: " + walletB.getBalance());
-		
+
 		Block block3 = new Block(block2.hash);
 		System.out.println("\nWalletB is attempting to send funds (20) to WalletA...");
 		block3.addTransaction(walletB.sendFunds( walletA.publicKey, 20));
 		blockchain.add(block3);
 		System.out.println("\nWalletA's balance is: " + walletA.getBalance());
 		System.out.println("WalletB's balance is: " + walletB.getBalance());
+		
 	}
 
 	public static String getMerkleRoot(ArrayList<Transaction> transactions) {
@@ -137,6 +158,10 @@ public class Cryptocoin {
 		}
 
 		return ret;
+	}
+
+	public static Chain getBlockchain() {
+		return blockchain;
 	}
 
 	public static String getKeyAsString(Object obj) {
