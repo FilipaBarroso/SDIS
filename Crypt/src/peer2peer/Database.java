@@ -26,12 +26,24 @@ public class Database implements Serializable {
 	//volatile to guarantee visibility across threads
 	private volatile HashMap<String,TransactionOutput> UTXOs;
 	private volatile ArrayList<Wallet> wallets;
+	private volatile int user_port = 8001;
 
 	public Database(){
 		setUTXOs(new HashMap<String,TransactionOutput>());
 		setWallets(new ArrayList<Wallet>());
 
 	}
+
+	/*
+	 * user port
+	 */
+	 public synchronized int getUserPort() {
+		 return user_port;
+	 }
+
+	 public synchronized void updateUserPort() {
+		 user_port++;
+	 }
 
 	/*
 	 * wallets

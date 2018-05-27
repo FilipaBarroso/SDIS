@@ -39,7 +39,7 @@ public class Wallet {
 		// generate hashes
 		generateKeys();
 
-		owner = new User(username);
+		owner = new User(username, 0);
 
 		// add this wallet to the list of existing wallets
 		Cryptocoin.addWallettoDB(this);

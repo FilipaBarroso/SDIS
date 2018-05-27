@@ -27,14 +27,17 @@
 		public static int MAX_BUFFER = 65000;
 		private MulticastSocket socket;
 		private DatagramPacket server_packet;
+		private int user_port;
 
-		public User(String username) {
+		public User(String username, int user_port) {
+			this.user_port = user_port;
+			System.out.println("User port " + user_port);
 			this.username = username;
 			cin = new BufferedReader(new InputStreamReader(System.in));
 			this.buffer = new byte[MAX_BUFFER];
 
 			try {
-				socket = new MulticastSocket(8001);
+				socket = new MulticastSocket(user_port);
 				socket.joinGroup(Cryptocoin.server_address);
 				server_packet = new DatagramPacket(buffer, buffer.length);
 			}
