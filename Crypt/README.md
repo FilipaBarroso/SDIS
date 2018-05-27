@@ -1,4 +1,7 @@
 COMPILE:
 
-in root folder
-javac -cp *.jar  src/blockchain/*.java src/peer2peer/*.java
+in src folder:
+javac -cp gson-2.6.2.jar:bcprov-jdk15on-159.jar blockchain/*.java peer2peer/*.java
+
+RUN:
+
