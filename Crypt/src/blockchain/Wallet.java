@@ -35,43 +35,27 @@ public class Wallet {
 	}
 	*/
 
-	public Wallet(String username, String pubKey, String privKey) {
-		// save keys
-		
-
-		owner = new User(username);
-		owner.addWallet(this);
-
-		// add this wallet to the list of existing wallets
-		Cryptocoin.wallets.add(this);
-
-		// add a base 100 coins to the wallet
-		if(owner.user_name == "bank" || owner.user_name == "genesis") return;
-		Cryptocoin.getBlockchain().currentBlock.addTransaction(Chain.bank.sendFunds(publicKey, 100f));
-	}
-
 	public Wallet(String username) {
 		// generate hashes
 		generateKeys();
 
 		owner = new User(username);
-		owner.addWallet(this);
 
 		// add this wallet to the list of existing wallets
 		Cryptocoin.wallets.add(this);
 
 		// add a base 100 coins to the wallet
-		if(owner.user_name == "bank" || owner.user_name == "genesis") return;
+		if(owner.username == "bank" || owner.username == "genesis") return;
 		Cryptocoin.getBlockchain().currentBlock.addTransaction(Chain.bank.sendFunds(publicKey, 100f));
 	}
 
 	@Override
 	public String toString() {
-		return owner.user_name;
+		return owner.username;
 	}
 
 	public boolean belongsTo(String user_name) {
-		return owner.user_name.equals(user_name);
+		return owner.username.equals(user_name);
 	}
 
 	public void mine(Block b) {
