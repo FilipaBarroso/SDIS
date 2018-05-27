@@ -34,73 +34,73 @@ public class Cryptocoin {
 	public static InetAddress server_address;
 	public static String server_name = "225.0.0.0";
 	public static int server_port = 8000;
-	private static Server server; 
+	private static Server server;
 
 	public static void main(String args[]) throws Exception {
 
-		Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider()); 
+		Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
 
 		// load database
-		
+
 		server_address = InetAddress.getByName(server_name);
 
 		/* ------------------------------------------------*/
-		/*
+
 		if(args.length < 1) {
 			blockchain = new Chain();
 			server = new Server(server_address, server_port);
 			new Thread(server).start();
 		}
-		
+
 		// else, arg is the user_name
 		// if the user with user_name arg doesn't belong to an existing wallet, create new one and thread(user).start()
 		// if it exists, thread(wallet.owner).start()
 		else if(args.length == 1) {
+			blockchain = new Chain();
 			User u = null;
-			
+
 			for(Wallet w : wallets) {
 				if(w.owner.user_name.equals(args[0])) {
 					u = w.owner;
 				}
 			}
-			
+
 			if(u == null) {
 				Wallet u_wallet = new Wallet(args[0]);
 				u = u_wallet.owner;
+
 			}
 
+			Wallet test_wallet = new Wallet("test");
 			new Thread(u).start();
 		}
-		*/
-		
+
+
 		/* debugging, without the if conditions */
-		Wallet walletA = new Wallet();
-		Wallet walletB = new Wallet();
+		/*
+		Wallet walletA = new Wallet("userA");
+		Wallet walletB = new Wallet("userB");
 
-		Block block1 = new Block(Chain.genesis_block.hash);
-		block1.addTransaction(Chain.bank.sendFunds(walletA.publicKey, 100f));
-		System.out.println("WalletA's balance is: " + walletA.getBalance());
-		System.out.println("WalletB's balance is: " + walletB.getBalance());
+		blockchain = new Chain();
+
+		blockchain.currentBlock.addTransaction(Chain.bank.sendFunds(walletA.publicKey, 100f));
+		System.out.println("userA's balance is: " + walletA.getBalance());
+		System.out.println("userB's balance is: " + walletB.getBalance());
 		System.out.println("\nWalletA is attempting to send funds (40) to WalletB...");
-		block1.addTransaction(walletA.sendFunds(walletB.publicKey, 40f));
-		blockchain.add(block1);
-		System.out.println("\nWalletA's balance is: " + walletA.getBalance());
-		System.out.println("WalletB's balance is: " + walletB.getBalance());
+		blockchain.currentBlock.addTransaction(walletA.sendFunds(walletB.publicKey, 40f));
+		System.out.println("\nuserA's balance is: " + walletA.getBalance());
+		System.out.println("userB's balance is: " + walletB.getBalance());
 
-		Block block2 = new Block(block1.hash);
-		System.out.println("\nWalletA is attempting to send more funds (1000) than it has...");
-		block2.addTransaction(walletA.sendFunds(walletB.publicKey, 1000f));
-		blockchain.add(block2);
-		System.out.println("\nWalletA's balance is: " + walletA.getBalance());
-		System.out.println("WalletB's balance is: " + walletB.getBalance());
+		System.out.println("\nuserA is attempting to send more funds (1000) than it has...");
+		blockchain.currentBlock.addTransaction(walletA.sendFunds(walletB.publicKey, 1000f));
+		System.out.println("\nuserA's balance is: " + walletA.getBalance());
+		System.out.println("userB's balance is: " + walletB.getBalance());
 
-		Block block3 = new Block(block2.hash);
-		System.out.println("\nWalletB is attempting to send funds (20) to WalletA...");
-		block3.addTransaction(walletB.sendFunds( walletA.publicKey, 20));
-		blockchain.add(block3);
-		System.out.println("\nWalletA's balance is: " + walletA.getBalance());
-		System.out.println("WalletB's balance is: " + walletB.getBalance());
-		
+		System.out.println("\nuserB is attempting to send funds (20) to WalletA...");
+		blockchain.currentBlock.addTransaction(walletB.sendFunds( walletA.publicKey, 20));
+		System.out.println("\nuserA's balance is: " + walletA.getBalance());
+		System.out.println("userB's balance is: " + walletB.getBalance());
+		*/
 	}
 
 	public static String getMerkleRoot(ArrayList<Transaction> transactions) {
