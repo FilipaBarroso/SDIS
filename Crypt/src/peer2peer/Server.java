@@ -36,7 +36,7 @@ public class Server implements Runnable {
 			socket = new MulticastSocket(port);
 			socket.joinGroup(ip);
 			packet = new DatagramPacket(buffer, buffer.length);
-		}
+		} 
 		catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -51,7 +51,7 @@ public class Server implements Runnable {
 			try {
 				socket.receive(packet);
 				decypherMsg(packet);
-			}
+			} 
 			catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -59,36 +59,36 @@ public class Server implements Runnable {
 	}
 
 	// ex: SEND RECIPIENT_PUBLICKEY_STRING VALUE USER_WALLET_PUBLICKEY_STRING
-	public void decypherMsg(DatagramPacket msg) {
+	public void decypherMsg(DatagramPacket msg) {		
 		String s = new String(msg.getData(), 0, msg.getLength());
 		msgTokens = s.split("\\s+");
-
+		
 		if(!msgTokens[0].equals("SEND") || msgTokens.length != 4) {
 			System.out.println("ERROR: Received a faulty message");
 			return;
 		}
-
+		
 		String recipient_publicKey = msgTokens[1];
 		Float value = Float.parseFloat(msgTokens[2]);
 		String sender_publicKey = msgTokens[3];
 		Wallet sender = null;
 		PublicKey recipient = null;
-
+		
 		for(Wallet w : Cryptocoin.wallets) {
 			if(w.getPublicKeyString().equals(sender_publicKey)) {
 				sender = w;
 				break;
 			}
 		}
-
+		
 		for(Wallet w : Cryptocoin.wallets) {
 			if(w.getPublicKeyString().equals(recipient_publicKey)) {
 				recipient = w.publicKey;
 				break;
 			}
 		}
-
+		
 		Transaction t = sender.sendFunds(recipient, value);
-		Cryptocoin.getBlockchain().currentBlock.addTransaction(t);
+		Chain.currentBlock.addTransaction(t);
 	}
 }

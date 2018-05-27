@@ -17,7 +17,7 @@ public class Block {
 	public ArrayList<Transaction> transaction_list = new ArrayList<Transaction>();
 	private long timestamp;
 	public int nonce = 0;
-	public boolean mined;
+	public static boolean mined;
 
 	public Block(String prevHash) {
 		this.previousHash = prevHash;
@@ -26,7 +26,7 @@ public class Block {
 		mined = false;
 	}
 
-	public boolean mineBlock(Wallet w) {
+	public void mineBlock(Wallet w) {
 		merkleRoot = Cryptocoin.getMerkleRoot(transaction_list);
 		String target = new String(new char[Cryptocoin.miningDifficulty]).replace('\0', '0');
 
@@ -35,37 +35,31 @@ public class Block {
 			hash = calculateHash();
 			if(mined) break;
 		}
-
-		System.out.println("Block mined with the hash: " + hash + "\n");
-
+		
 		if(!mined) {
 			mined = true;
-			Cryptocoin.getBlockchain().giveMiningReward(w, hash);
-			return true;
+			Chain.giveMiningReward(w, hash);
 		}
-
-		return false;
+		
+		System.out.println("Block mined with the hash: " + hash);
 	}
-
+	
 	public boolean addTransaction(Transaction trans) {
 		if(trans == null) return false;
-
-		//if(hash != "0")
-			if(!trans.processTransaction())
+		
+		if(previousHash != "0")
+			if(!trans.processTransaction()) 
 				return false;
-
+		
 		transaction_list.add(trans);
-
-		System.out.println("\nTransaction stored .. current block has " + transaction_list.size() + " transactions");
-
+		
 		// each block gets added to the chain to be mined after 3 transactions
-		if(transaction_list.size() >= 3) {
-			System.out.println("Adding current block to chain");
-			Cryptocoin.getBlockchain().addCurrentBlock();
-		}
+		if(transaction_list.size() >= 3)
+			Cryptocoin.getBlockchain().add(this);
+		
 		return true;
 	}
-
+	
 	public String calculateHash() {
 		return Cryptocoin.sha256(
 				previousHash +

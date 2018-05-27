@@ -11,38 +11,36 @@ import java.util.Random;
 import com.google.gson.*;
 
 public class Chain {
-
+	
 	private static ArrayList<Block> blockchain;
 	public static Transaction genesisTransaction;
 	public static Block genesis_block;
 	public static Wallet bank;
-	public static float miningReward = (float)(Cryptocoin.miningDifficulty); // the reward is the same value as the difficultry
+	public static float miningReward = 1f;
 	public static float bankFunds = 1000000000f;
-	public Block currentBlock; // this block is always the one next to be added. It's created after the current one is mined and added to the chain
-	public Block tmpRewardBlock; // this block exists as a temporary block while the current one is being added, during mining
-
+	public static Block currentBlock; // this block is always the one next to be added. It's created after the current one is mined and added to the chain
+	
 	public Chain() {
 		Chain.setChain(new ArrayList<Block>());
-
+		
 		// adds an empty block so the chain isn't empty
 		genesis_block = new Block("0");
 
-		bank = new Wallet("bank");
-		Wallet genesisWallet = new Wallet("genesis");
-
-		// create genesis transaction, which fills the bank up
+		bank = new Wallet();
+		Wallet genesisWallet = new Wallet();
+		
+		// create genesis transaction, which fills the bank up 
 		genesisTransaction = new Transaction(genesisWallet.publicKey, bank.publicKey, bankFunds, null);
-		genesisTransaction.generateSignature(genesisWallet.privateKey);	 //manually sign the genesis transaction
+		genesisTransaction.generateSignature(genesisWallet.privateKey);	 //manually sign the genesis transaction	
 		genesisTransaction.id = "0"; //manually set the transaction id
 		genesisTransaction.outputs.add(new TransactionOutput(genesisTransaction.recipient, genesisTransaction.value, genesisTransaction.id)); //manually add the Transactions Output
 		Cryptocoin.UTXOs.put(genesisTransaction.outputs.get(0).id, genesisTransaction.outputs.get(0)); //its important to store our first transaction in the UTXOs list.
 
 		genesis_block.addTransaction(genesisTransaction);
 		blockchain.add(genesis_block);
-		System.out.println("\nAdded genesis block with hash: " + genesis_block.hash);
-		currentBlock = new Block(genesis_block.hash);
+		currentBlock = new Block(genesis_block.previousHash);
 	}
-
+	
 	public static ArrayList<Block> getChain() {
 		return blockchain;
 	}
@@ -53,115 +51,109 @@ public class Chain {
 
 	// have all existing users mining the block TODO seperately
 	// whoever mines it first gets a reward
-	public void addCurrentBlock() {
+	public void add(Block b) {
 		for(Wallet w : Cryptocoin.wallets) {
 			// TODO call this in a thread
-			w.mine(currentBlock);
-			break; // TODO not have a break
+			w.mine(b);
 		}
-
-		Chain.blockchain.add(currentBlock);
-		currentBlock = tmpRewardBlock;
-
-		System.out.println("Added block to blockchain\n");
-
+		
+		Chain.blockchain.add(b);
 		if(!isChainValid()) {
 			System.out.println("ERROR: chain invalid\n");
-			blockchain.remove(currentBlock);
+			blockchain.remove(b);
 		}
 	}
 
-	public void giveMiningReward(Wallet w, String prevHash) {
-		// create a new block, to store this new reward transactionUTXO
-		System.out.println("Giving mining");
-		tmpRewardBlock = new Block(prevHash);
-		tmpRewardBlock.addTransaction(bank.sendFunds(w.publicKey, miningReward));
+	public static void giveMiningReward(Wallet w, String prevHash) {
+		// create a new block, to store this new reward transaction
+		currentBlock = new Block(prevHash);
+		currentBlock.addTransaction(bank.sendFunds(w.publicKey, miningReward));
 	}
-
+	
 	public void printChain() {
-		String blockchainJson = new GsonBuilder().setPrettyPrinting().create().toJson(blockchain);
+		String blockchainJson = new GsonBuilder().setPrettyPrinting().create().toJson(blockchain);		
 		System.out.println(blockchainJson);
 	}
 
-	public String getLastHash() {
+	public String getLastHash() { 
 		return blockchain.get(blockchain.size()).hash;
 	}
-
-	public boolean isChainValid() {
+	
+	public boolean isChainValid() { 
 		Block curr, prev;
 		int i;
 		String targetHash = new String(new char[Cryptocoin.miningDifficulty]).replace('\0', '0');
 		HashMap<String,TransactionOutput> tempUTXOs = new HashMap<String,TransactionOutput>(); //a temporary working list of unspent transactions at a given block state.
 		tempUTXOs.put(genesisTransaction.outputs.get(0).id, genesisTransaction.outputs.get(0));
-
+		
 		for(i=1; i < blockchain.size(); i++) {
 			curr = blockchain.get(i);
 			prev = blockchain.get(i-1);
-
+			
 			// validate hashes
 			if(!curr.hash.equals(curr.calculateHash())) {
 				System.out.println("CHAIN ERROR: this block is defective - " + curr.hash);
 				return false;
 			}
-
+			
 			if(!prev.hash.equals(curr.previousHash)) {
-				System.out.println("CHAIN ERROR: this block doesn't match with the rest of the chain\ncurrent's previous hash: " + curr.previousHash + "\nprevious hash: " + prev.hash);
+				System.out.println("CHAIN ERROR: this block doesn't match with the rest of the chain - " + curr.hash);
 				return false;
 			}
-
+			
 			if(!curr.hash.substring(0, Cryptocoin.miningDifficulty).equals(targetHash)) {
 				System.out.println("CHAIN ERROR: there's a block that hasn't been mined yet");
 			}
-
+			
 			// validate transactions
 			TransactionOutput tempOutput;
 			for(int t=0; t < curr.transaction_list.size(); t++) {
 				Transaction currTransaction = curr.transaction_list.get(t);
-
+				
 				if(!currTransaction.verifySignature()) {
 					System.out.println("CHAIN ERROR: couldn't verify a signature for a transaction in this block");
 					return false;
 				}
-
+				
 				if(currTransaction.getTotalInputs() != currTransaction.getTotalOutputs()) {
 					System.out.println("CHAIN ERROR: inputs don't equal outputs for a transaction in this block");
 					return false;
 				}
-
+				
 				for(TransactionInput ti : currTransaction.inputs) {
 					tempOutput = tempUTXOs.get(ti.transOutputID);
-
+					
 					if(tempOutput == null) {
 						System.out.println("CHAIN ERROR: input is missing on a transaction");
 						return false;
 					}
-
+					
 					if(ti.UTXO.value != tempOutput.value) {
 						System.out.println("CHAIN ERROR: value is invalid on a transaction");
 						return false;
 					}
-
+					
 					tempUTXOs.remove(ti.transOutputID);
 				}
-
+				
 				for(TransactionOutput to : currTransaction.outputs) {
 					tempUTXOs.put(to.id, to);
 				}
-
+				
 				if(currTransaction.outputs.get(0).recipient != currTransaction.recipient) {
 					System.out.println("CHAIN ERROR: recipient mismatch on a transaction");
 					return false;
 				}
-
+				
 				if(currTransaction.outputs.get(1).recipient != currTransaction.sender) {
 					System.out.println("CHAIN ERROR: sender mismatch on a transaction");
 					return false;
 				}
 			}
 		}
-
+		
 		System.out.println("Chain is valid");
-
+		
 		return true;
 	}
 }
