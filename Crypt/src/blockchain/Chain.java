@@ -26,7 +26,7 @@ public class Chain {
 
 		// adds an empty block so the chain isn't empty
 		genesis_block = new Block("0");
-
+ 
 		bank = new Wallet("bank");
 		Wallet genesisWallet = new Wallet("genesis");
 
