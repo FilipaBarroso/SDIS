@@ -37,7 +37,8 @@ public class User implements Runnable{
 
 	@Override
 	public void run() {
-		System.out.println(user_name + " logged in");
+		handleLogin();
+		System.out.println("\n" + user_name + " logged in");
 
 		while(true) {
 			try {
@@ -56,9 +57,22 @@ public class User implements Runnable{
 		}
 	}
 
+	public void handleLogin() throws Exception {
+		String s = "SEND "
+				+ key + " "
+				+ value + " "
+				+ user_wallet.getPublicKeyString();
+
+		byte[] msg = s.getBytes();
+		DatagramPacket packet = new DatagramPacket(msg, msg.length, Cryptocoin.server_address, Cryptocoin.server_port);
+		MulticastSocket socket = new MulticastSocket(8001);
+		socket.send(packet);
+		socket.close();
+	}
+
 	public void handleSendFunds() {
 		try {
-			System.out.println("\nSend to user: ..");
+			System.out.println("\nSend to user:");
 			String username;
 			PublicKey recipientPublicKey = null;
 			username = (String)cin.readLine();
@@ -74,7 +88,7 @@ public class User implements Runnable{
 				return;
 			}
 
-			System.out.println("How much? ..");
+			System.out.println("How much:");
 			float value;
 			value = Float.parseFloat((String)cin.readLine());
 
@@ -91,9 +105,9 @@ public class User implements Runnable{
 	}
 
 	public void sendMsg(String key, Float value) throws Exception {
-		String s = "SEND"
-				+ key
-				+ value
+		String s = "SEND "
+				+ key + " "
+				+ value + " "
 				+ user_wallet.getPublicKeyString();
 
 		byte[] msg = s.getBytes();

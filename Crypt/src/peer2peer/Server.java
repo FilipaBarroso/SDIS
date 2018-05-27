@@ -63,6 +63,8 @@ public class Server implements Runnable {
 		String s = new String(msg.getData(), 0, msg.getLength());
 		msgTokens = s.split("\\s+");
 
+		System.out.println("Received msg: " + s);
+
 		if(!msgTokens[0].equals("SEND") || msgTokens.length != 4) {
 			System.out.println("ERROR: Received a faulty message");
 			return;

@@ -35,6 +35,21 @@ public class Wallet {
 	}
 	*/
 
+	public Wallet(String username, String pubKey, String privKey) {
+		// save keys
+		
+
+		owner = new User(username);
+		owner.addWallet(this);
+
+		// add this wallet to the list of existing wallets
+		Cryptocoin.wallets.add(this);
+
+		// add a base 100 coins to the wallet
+		if(owner.user_name == "bank" || owner.user_name == "genesis") return;
+		Cryptocoin.getBlockchain().currentBlock.addTransaction(Chain.bank.sendFunds(publicKey, 100f));
+	}
+
 	public Wallet(String username) {
 		// generate hashes
 		generateKeys();
