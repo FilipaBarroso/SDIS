@@ -1,6 +1,4 @@
-compile:
+COMPILE:
 
-add external libraries gson and bouncycastle to the build path
-
-in src folder
-javac -cp blockchain/*.java peer2peer/*.java
+in root folder
+javac -cp *.jar  src/blockchain/*.java src/peer2peer/*.java
