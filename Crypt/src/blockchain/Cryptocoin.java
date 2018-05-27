@@ -49,6 +49,8 @@ public class Cryptocoin {
 		if(args.length < 1) {
 			blockchain = new Chain();
 			server = new Server(server_address, server_port);
+
+			Wallet test_wallet = new Wallet("test");
 			new Thread(server).start();
 		}
 
@@ -56,9 +58,10 @@ public class Cryptocoin {
 		// if the user with username arg doesn't belong to an existing wallet, create new one and thread(user).start()
 		// if it exists, thread(wallet.owner).start()
 		else if(args.length == 1) {
-			blockchain = new Chain();
-			User u = null;
+			//blockchain = new Chain();
 
+			User u = new User(args[0]);
+			/*
 			for(Wallet w : wallets) {
 				if(w.owner.username.equals(args[0])) {
 					u = w.owner;
@@ -69,9 +72,8 @@ public class Cryptocoin {
 				Wallet u_wallet = new Wallet(args[0]);
 				u = u_wallet.owner;
 
-			}
+			}*/
 
-			Wallet test_wallet = new Wallet("test");
 			new Thread(u).start();
 		}
 
