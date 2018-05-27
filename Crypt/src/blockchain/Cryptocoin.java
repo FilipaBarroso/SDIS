@@ -26,8 +26,8 @@ public class Cryptocoin {
 	public static int minimunTransactionAmount = 1;
 
 	//list of all unspent transactions outputs TODO save this in a database
-	public static HashMap<String,TransactionOutput> UTXOs = new HashMap<String,TransactionOutput>();
-	public static ArrayList<Wallet> wallets = new ArrayList<Wallet>();
+	//public static HashMap<String,TransactionOutput> UTXOs = new HashMap<String,TransactionOutput>();
+	//public static ArrayList<Wallet> wallets = new ArrayList<Wallet>();
 
 	private static Database database = new Database();
 
