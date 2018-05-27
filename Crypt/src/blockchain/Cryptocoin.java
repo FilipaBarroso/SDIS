@@ -14,21 +14,37 @@ import java.security.*;
 import java.security.spec.*;
 import java.util.Base64;
 import java.util.HashMap;
+
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.InetAddress;
+import java.net.MulticastSocket;
+import java.security.MessageDigest;
+import java.security.PublicKey;
+import java.security.Signature;
+import java.util.ArrayList;
+import java.util.Random;
+import java.security.Security;
+import java.security.*;
+import java.security.spec.*;
+import java.util.Base64;
+import java.util.HashMap;
 import org.bouncycastle.*;
 import com.google.gson.GsonBuilder;
 
-import peer2peer.Server;
-import peer2peer.User;
+import peer2peer.*;
 
 public class Cryptocoin {
 
 	private static Chain blockchain;
 	public static int miningDifficulty = 4;
 	public static int minimunTransactionAmount = 1;
+	
+	private static Database database = new Database();
 
 	//list of all unspent transactions outputs TODO save this in a database
-	public static HashMap<String,TransactionOutput> UTXOs = new HashMap<String,TransactionOutput>();
-	public static ArrayList<Wallet> wallets = new ArrayList<Wallet>();
+	//public static HashMap<String,TransactionOutput> UTXOs = new HashMap<String,TransactionOutput>();
+	//public static ArrayList<Wallet> wallets = new ArrayList<Wallet>();
 
 	// server related variables
 	public static InetAddress server_address;
@@ -59,7 +75,7 @@ public class Cryptocoin {
 			blockchain = new Chain();
 			User u = null;
 
-			for(Wallet w : wallets) {
+			for(Wallet w : database.getWallets()) {
 				if(w.owner.username.equals(args[0])) {
 					u = w.owner;
 				}
@@ -80,9 +96,7 @@ public class Cryptocoin {
 		/*
 		Wallet walletA = new Wallet("userA");
 		Wallet walletB = new Wallet("userB");
-
 		blockchain = new Chain();
-
 		blockchain.currentBlock.addTransaction(Chain.bank.sendFunds(walletA.publicKey, 100f));
 		System.out.println("userA's balance is: " + walletA.getBalance());
 		System.out.println("userB's balance is: " + walletB.getBalance());
@@ -90,12 +104,10 @@ public class Cryptocoin {
 		blockchain.currentBlock.addTransaction(walletA.sendFunds(walletB.publicKey, 40f));
 		System.out.println("\nuserA's balance is: " + walletA.getBalance());
 		System.out.println("userB's balance is: " + walletB.getBalance());
-
 		System.out.println("\nuserA is attempting to send more funds (1000) than it has...");
 		blockchain.currentBlock.addTransaction(walletA.sendFunds(walletB.publicKey, 1000f));
 		System.out.println("\nuserA's balance is: " + walletA.getBalance());
 		System.out.println("userB's balance is: " + walletB.getBalance());
-
 		System.out.println("\nuserB is attempting to send funds (20) to WalletA...");
 		blockchain.currentBlock.addTransaction(walletB.sendFunds( walletA.publicKey, 20));
 		System.out.println("\nuserA's balance is: " + walletA.getBalance());
@@ -178,5 +190,21 @@ public class Cryptocoin {
 		}
 
 		return null;
+	}
+	
+	public static Database getDatabase() {
+		return database;
+	}
+	
+	public static void addUTXOtoDB(String s, TransactionOutput t){
+		database.addUTXOs(s, t);
+	}
+	
+	public static void removeUTXOfromDB(String s){
+		database.removeUTXO(s);
+	}
+	
+	public static void addWallettoDB(Wallet w, User u){
+		database.addWallet(w, u);
 	}
 }

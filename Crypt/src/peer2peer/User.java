@@ -1,4 +1,4 @@
-	package peer2peer;
+package peer2peer;
 
 	import java.io.BufferedReader;
 	import java.io.IOException;
@@ -87,7 +87,7 @@
 				PublicKey recipientPublicKey = null;
 				username = (String)cin.readLine();
 
-				for(Wallet w : Cryptocoin.wallets) {
+				for(Wallet w : Cryptocoin.getDatabase().getWallets()) {
 					if(w.owner.username.equals(username)) {
 						recipientPublicKey = w.publicKey;
 						continue;

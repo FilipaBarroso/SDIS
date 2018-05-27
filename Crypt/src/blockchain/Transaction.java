@@ -1,4 +1,4 @@
-	package blockchain;
+package blockchain;
 
 	import java.io.IOException;
 	import java.net.DatagramPacket;
@@ -47,7 +47,7 @@
 			// make sure transaction inputs are unspent
 			if(inputs != null) { // make sure it isnt the genesis block
 				for(TransactionInput ti : inputs) {
-					ti.UTXO = Cryptocoin.UTXOs.get(ti.transOutputID);
+					ti.UTXO = Cryptocoin.getDatabase().getUTXOs().get(ti.transOutputID);
 				}
 
 
@@ -68,13 +68,13 @@
 			// remove inputs from unspent list (because they're being spent)
 			for(TransactionInput ti : inputs) {
 				if(ti.UTXO == null) continue;
-				Cryptocoin.UTXOs.remove(ti.UTXO.id);
+				Cryptocoin.removeUTXOfromDB(ti.UTXO.id);
 			}
 		}
 
 		// add outputs to unspent list
 		for(TransactionOutput to : outputs) {
-			Cryptocoin.UTXOs.put(to.id, to);
+			Cryptocoin.addUTXOtoDB(to.id, to);
 		}
 			return true;
 		}

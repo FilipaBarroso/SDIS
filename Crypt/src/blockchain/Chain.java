@@ -35,7 +35,7 @@ public class Chain {
 		genesisTransaction.generateSignature(genesisWallet.privateKey);	 //manually sign the genesis transaction
 		genesisTransaction.id = "0"; //manually set the transaction id
 		genesisTransaction.outputs.add(new TransactionOutput(genesisTransaction.recipient, genesisTransaction.value, genesisTransaction.id)); //manually add the Transactions Output
-		Cryptocoin.UTXOs.put(genesisTransaction.outputs.get(0).id, genesisTransaction.outputs.get(0)); //its important to store our first transaction in the UTXOs list.
+		Cryptocoin.addUTXOtoDB(genesisTransaction.outputs.get(0).id, genesisTransaction.outputs.get(0)); //its important to store our first transaction in the UTXOs list.
 
 		genesis_block.addTransaction(genesisTransaction);
 		blockchain.add(genesis_block);
@@ -51,10 +51,10 @@ public class Chain {
 		Chain.blockchain = blockchain;
 	}
 
-	// have all existing users mining the block TODO seperately
+	// have all existing users mining the block TODO separately
 	// whoever mines it first gets a reward
 	public void addCurrentBlock() {
-		for(Wallet w : Cryptocoin.wallets) {
+		for(Wallet w : Cryptocoin.getDatabase().getWallets()) {
 			// TODO call this in a thread
 			w.mine(currentBlock);
 			break; // TODO not have a break
