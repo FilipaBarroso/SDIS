@@ -16,9 +16,10 @@ public class Chain {
 	public static Transaction genesisTransaction;
 	public static Block genesis_block;
 	public static Wallet bank;
-	public static float miningReward = 1f;
+	public static float miningReward = (float)(Cryptocoin.miningDifficulty); // the reward is the same value as the difficultry
 	public static float bankFunds = 1000000000f;
 	public Block currentBlock; // this block is always the one next to be added. It's created after the current one is mined and added to the chain
+	public Block tmpRewardBlock; // this block exists as a temporary block while the current one is being added, during mining
 
 	public Chain() {
 		Chain.setChain(new ArrayList<Block>());
@@ -26,8 +27,8 @@ public class Chain {
 		// adds an empty block so the chain isn't empty
 		genesis_block = new Block("0");
 
-		bank = new Wallet();
-		Wallet genesisWallet = new Wallet();
+		bank = new Wallet("bank");
+		Wallet genesisWallet = new Wallet("genesis");
 
 		// create genesis transaction, which fills the bank up
 		genesisTransaction = new Transaction(genesisWallet.publicKey, bank.publicKey, bankFunds, null);
@@ -38,8 +39,8 @@ public class Chain {
 
 		genesis_block.addTransaction(genesisTransaction);
 		blockchain.add(genesis_block);
-		System.out.println("Added genesis block\n");
-		currentBlock = new Block(genesis_block.previousHash);
+		System.out.println("\nAdded genesis block with hash: " + genesis_block.hash);
+		currentBlock = new Block(genesis_block.hash);
 	}
 
 	public static ArrayList<Block> getChain() {
@@ -56,9 +57,11 @@ public class Chain {
 		for(Wallet w : Cryptocoin.wallets) {
 			// TODO call this in a thread
 			w.mine(currentBlock);
+			break; // TODO not have a break
 		}
 
 		Chain.blockchain.add(currentBlock);
+		currentBlock = tmpRewardBlock;
 
 		System.out.println("Added block to blockchain\n");
 
@@ -69,9 +72,10 @@ public class Chain {
 	}
 
 	public void giveMiningReward(Wallet w, String prevHash) {
-		// create a new block, to store this new reward transaction
-		currentBlock = new Block(prevHash);
-		currentBlock.addTransaction(bank.sendFunds(w.publicKey, miningReward));
+		// create a new block, to store this new reward transactionUTXO
+		System.out.println("Giving mining");
+		tmpRewardBlock = new Block(prevHash);
+		tmpRewardBlock.addTransaction(bank.sendFunds(w.publicKey, miningReward));
 	}
 
 	public void printChain() {
@@ -101,7 +105,7 @@ public class Chain {
 			}
 
 			if(!prev.hash.equals(curr.previousHash)) {
-				System.out.println("CHAIN ERROR: this block doesn't match with the rest of the chain - " + curr.hash);
+				System.out.println("CHAIN ERROR: this block doesn't match with the rest of the chain\ncurrent's previous hash: " + curr.previousHash + "\nprevious hash: " + prev.hash);
 				return false;
 			}
 

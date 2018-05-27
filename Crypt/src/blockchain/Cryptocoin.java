@@ -74,28 +74,28 @@ public class Cryptocoin {
 		*/
 
 		/* debugging, without the if conditions */
-		Wallet walletA = new Wallet();
-		Wallet walletB = new Wallet();
+		Wallet walletA = new Wallet("userA");
+		Wallet walletB = new Wallet("userB");
 
 		blockchain = new Chain();
 
-		System.out.println(blockchain.currentBlock.addTransaction(Chain.bank.sendFunds(walletA.publicKey, 100f)));
-		System.out.println("WalletA's balance is: " + walletA.getBalance());
-		System.out.println("WalletB's balance is: " + walletB.getBalance());
+		blockchain.currentBlock.addTransaction(Chain.bank.sendFunds(walletA.publicKey, 100f));
+		System.out.println("userA's balance is: " + walletA.getBalance());
+		System.out.println("userB's balance is: " + walletB.getBalance());
 		System.out.println("\nWalletA is attempting to send funds (40) to WalletB...");
 		blockchain.currentBlock.addTransaction(walletA.sendFunds(walletB.publicKey, 40f));
-		System.out.println("\nWalletA's balance is: " + walletA.getBalance());
-		System.out.println("WalletB's balance is: " + walletB.getBalance());
+		System.out.println("\nuserA's balance is: " + walletA.getBalance());
+		System.out.println("userB's balance is: " + walletB.getBalance());
 
-		System.out.println("\nWalletA is attempting to send more funds (1000) than it has...");
+		System.out.println("\nuserA is attempting to send more funds (1000) than it has...");
 		blockchain.currentBlock.addTransaction(walletA.sendFunds(walletB.publicKey, 1000f));
-		System.out.println("\nWalletA's balance is: " + walletA.getBalance());
-		System.out.println("WalletB's balance is: " + walletB.getBalance());
+		System.out.println("\nuserA's balance is: " + walletA.getBalance());
+		System.out.println("userB's balance is: " + walletB.getBalance());
 
-		System.out.println("\nWalletB is attempting to send funds (20) to WalletA...");
+		System.out.println("\nuserB is attempting to send funds (20) to WalletA...");
 		blockchain.currentBlock.addTransaction(walletB.sendFunds( walletA.publicKey, 20));
-		System.out.println("\nWalletA's balance is: " + walletA.getBalance());
-		System.out.println("WalletB's balance is: " + walletB.getBalance());
+		System.out.println("\nuserA's balance is: " + walletA.getBalance());
+		System.out.println("userB's balance is: " + walletB.getBalance());
 
 	}
 

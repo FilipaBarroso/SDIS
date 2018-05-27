@@ -20,44 +20,52 @@ public class Wallet {
 	public PrivateKey privateKey;
 	public PublicKey publicKey;
 	public User owner;
-	
+
 	// contains all unspent outputs from this wallet aka its balance
 	public HashMap<String,TransactionOutput> WalletUTXOs = new HashMap<String,TransactionOutput>();
-	
+
 	// this constructor should never be used
+	/*
 	public Wallet() {
 		// generate hashes
 		generateKeys();
-		
+
 		// add this wallet to the list of existing wallets
 		Cryptocoin.wallets.add(this);
 	}
-	
+	*/
+
 	public Wallet(String username) {
 		// generate hashes
 		generateKeys();
-		
+
 		owner = new User(username);
 		owner.addWallet(this);
-		
+
 		// add this wallet to the list of existing wallets
 		Cryptocoin.wallets.add(this);
 	}
-	
+
+	@Override
+	public String toString() {
+		return owner.user_name;
+	}
+
 	public boolean belongsTo(String user_name) {
 		return owner.user_name.equals(user_name);
 	}
 
 	public void mine(Block b) {
-		b.mineBlock(this);
+		if(b.mineBlock(this))
+			System.out.println(this.toString() + " got the mining reward of "+ Cryptocoin.getBlockchain().miningReward);
 	}
-	
+
 	public Transaction sendFunds(PublicKey recipient, float value) {
 		if(getBalance() < value) {
 			System.out.println("WALLET ERROR: insuficient funds");
 			return null;
 		}
-		
+
 		// make the transaction inputs list aka the spent outputs
 		ArrayList<TransactionInput> inputs = new ArrayList<TransactionInput>();
 		float total = 0;
@@ -71,16 +79,16 @@ public class Wallet {
 
 		Transaction newTrans = new Transaction(publicKey, recipient, value, inputs);
 		newTrans.generateSignature(privateKey);
-		
+
 		// remove spent outputs from unspent outputs
 		for(TransactionInput ti : inputs) WalletUTXOs.remove(ti.transOutputID);
-		
+
 		return newTrans;
 	}
-	
+
 	public float getBalance() {
 		float total = 0;
-		
+
 		for(Map.Entry<String, TransactionOutput> item : Cryptocoin.UTXOs.entrySet()) {
 			TransactionOutput UTXO = item.getValue();
 			// add unspent outputs to this wallet
@@ -89,26 +97,26 @@ public class Wallet {
 				total += UTXO.value;
 			}
 		}
-		
+
 		return total;
 	}
-	
+
 	public String getPrivateKeyString() {
 		return Cryptocoin.getKeyAsString(privateKey);
 	}
-	
+
 	public String getPublicKeyString() {
 		return Cryptocoin.getKeyAsString(publicKey);
 	}
-	
+
 	public void generateKeys() {
 		KeyPairGenerator keyGen;
 		try {
 			keyGen = KeyPairGenerator.getInstance("ECDSA", "BC");
 			SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
 			ECGenParameterSpec ecSpec = new ECGenParameterSpec("prime192v1");
-			
-			keyGen.initialize(ecSpec, random);   
+
+			keyGen.initialize(ecSpec, random);
 	    	KeyPair keyPair = keyGen.generateKeyPair();
 
 	    	privateKey = keyPair.getPrivate();
