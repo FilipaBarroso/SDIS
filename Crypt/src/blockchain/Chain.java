@@ -26,7 +26,7 @@ public class Chain {
 
 		// adds an empty block so the chain isn't empty
 		genesis_block = new Block("0");
- 
+
 		bank = new Wallet("bank");
 		Wallet genesisWallet = new Wallet("genesis");
 
@@ -51,7 +51,7 @@ public class Chain {
 		Chain.blockchain = blockchain;
 	}
 
-	// have all existing users mining the block TODO separately
+	// have all existing users mining the block TODO seperately
 	// whoever mines it first gets a reward
 	public void addCurrentBlock() {
 		for(Wallet w : Cryptocoin.getDatabase().getWallets()) {

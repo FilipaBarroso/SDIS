@@ -1,4 +1,4 @@
-package peer2peer;
+	package peer2peer;
 
 	import java.io.BufferedReader;
 	import java.io.IOException;
@@ -35,6 +35,7 @@ package peer2peer;
 
 			try {
 				socket = new MulticastSocket(8001);
+				socket.joinGroup(Cryptocoin.server_address);
 				server_packet = new DatagramPacket(buffer, buffer.length);
 			}
 			catch (IOException e) {
@@ -73,7 +74,6 @@ package peer2peer;
 			byte[] msg = s.getBytes();
 			DatagramPacket packet = new DatagramPacket(msg, msg.length, Cryptocoin.server_address, Cryptocoin.server_port);
 			socket.send(packet);
-			socket.close();
 			}
 			catch (Exception e) {
 
@@ -83,31 +83,15 @@ package peer2peer;
 		public void handleSendFunds() {
 			try {
 				System.out.println("\nSend to user:");
-				String username;
+				String recipient_username;
 				PublicKey recipientPublicKey = null;
-				username = (String)cin.readLine();
-
-				for(Wallet w : Cryptocoin.getDatabase().getWallets()) {
-					if(w.owner.username.equals(username)) {
-						recipientPublicKey = w.publicKey;
-						continue;
-					}
-				}
-				if(recipientPublicKey == null) {
-					System.out.println("ERROR: User doesn't exist");
-					return;
-				}
+				recipient_username = (String)cin.readLine();
 
 				System.out.println("How much:");
 				float value;
 				value = Float.parseFloat((String)cin.readLine());
 
-				// TODO send packet to the server with the message SEND PUBLIC_KEY VALUE USER_WALLET
-				sendMsg(Cryptocoin.getKeyAsString(recipientPublicKey), value);
-
-				//Transaction t = user_wallet.sendFunds(recipient, value);
-				//Chain.currentBlock.addTransaction(t);
-
+				sendMsg(recipient_username, value);
 			}
 			catch (Exception e) {
 				e.printStackTrace();
@@ -125,9 +109,14 @@ package peer2peer;
 			byte[] msg = s.getBytes();
 			DatagramPacket packet = new DatagramPacket(msg, msg.length, Cryptocoin.server_address, Cryptocoin.server_port);
 			socket.send(packet);
-			socket.close();
 
 			Thread.sleep(2000);
+
+			// TODO interpret error messages
+
+			socket.receive(server_packet);
+			String balance = new String(server_packet.getData(), 0, server_packet.getLength());
+			System.out.println("\n" + username + " has " + balance + " coins");
 		}
 
 		public void handleCheckBalance() {
@@ -141,9 +130,9 @@ package peer2peer;
 
 			Thread.sleep(2000);
 
-				socket.receive(packet);
-				String balance = new String(packet.getData(), 0, packet.getLength());
-				System.out.println("\nThis user has " + balance + " coins");
+				socket.receive(server_packet);
+				String balance = new String(server_packet.getData(), 0, server_packet.getLength());
+				System.out.println("\n" + username + " has " + balance + " coins");
 			}
 			catch (Exception e) {
 				e.printStackTrace();

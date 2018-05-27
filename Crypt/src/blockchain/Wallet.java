@@ -29,6 +29,7 @@ public class Wallet {
 	public Wallet() {
 		// generate hashes
 		generateKeys();
+
 		// add this wallet to the list of existing wallets
 		Cryptocoin.wallets.add(this);
 	}
@@ -41,19 +42,11 @@ public class Wallet {
 		owner = new User(username);
 
 		// add this wallet to the list of existing wallets
-		Cryptocoin.addWallettoDB(this, owner);
+		Cryptocoin.addWallettoDB(this);
 
 		// add a base 100 coins to the wallet
 		if(owner.username == "bank" || owner.username == "genesis") return;
 		Cryptocoin.getBlockchain().currentBlock.addTransaction(Chain.bank.sendFunds(publicKey, 100f));
-	}
-	
-	public User getOwner() {
-		return owner;
-	}
-
-	public void setOwner(User owner) {
-		this.owner = owner;
 	}
 
 	@Override
