@@ -46,7 +46,7 @@ public class Transaction {
 
 		// make sure transaction inputs are unspent
 		for(TransactionInput ti : inputs) {
-			ti.UTXO = Cryptocoin.UTXOs.get(ti.transOutputID);
+			ti.UTXO = Cryptocoin.getDatabase().getUTXOs().get(ti.transOutputID);
 		}
 
 		// make sure transaction value is enough
@@ -63,13 +63,13 @@ public class Transaction {
 
 		// add outputs to unspent list
 		for(TransactionOutput to : outputs) {
-			Cryptocoin.UTXOs.put(to.id, to);
+			Cryptocoin.addUTXOtoDB(to.id, to);
 		}
 
 		// remove inputs from unspent list (because they're being spent)
 		for(TransactionInput ti : inputs) {
 			if(ti.UTXO == null) continue;
-			Cryptocoin.UTXOs.remove(ti.UTXO.id);
+			Cryptocoin.removeUTXOfromDB(ti.UTXO.id);
 		}
 
 		return true;

@@ -19,16 +19,18 @@ import com.google.gson.GsonBuilder;
 
 import peer2peer.Server;
 import peer2peer.User;
+import peer2peer.Database;
 
 public class Cryptocoin {
 
 	private static Chain blockchain;
 	public static int miningDifficulty = 4;
 	public static int minimunTransactionAmount = 1;
+	private static Database database = new Database();
 
 	//list of all unspent transactions outputs TODO save this in a database
-	public static HashMap<String,TransactionOutput> UTXOs = new HashMap<String,TransactionOutput>();
-	public static ArrayList<Wallet> wallets = new ArrayList<Wallet>();
+	//public static HashMap<String,TransactionOutput> UTXOs = new HashMap<String,TransactionOutput>();
+	//public static ArrayList<Wallet> wallets = new ArrayList<Wallet>();
 
 	// server related variables
 	public static InetAddress server_address;
@@ -74,9 +76,11 @@ public class Cryptocoin {
 		*/
 		
 		/* debugging, without the if conditions */
-		Wallet walletA = new Wallet();
-		Wallet walletB = new Wallet();
-
+		Wallet walletA = new Wallet("userA");
+		Wallet walletB = new Wallet("userB");
+		
+		blockchain = new Chain();
+		
 		Block block1 = new Block(Chain.genesis_block.hash);
 		block1.addTransaction(Chain.bank.sendFunds(walletA.publicKey, 100f));
 		System.out.println("WalletA's balance is: " + walletA.getBalance());
@@ -178,5 +182,21 @@ public class Cryptocoin {
 		}
 
 		return null;
+	}
+	
+	public static Database getDatabase() {
+		return database;
+	}
+	
+	public static void addUTXOtoDB(String s, TransactionOutput t){
+		database.addUTXOs(s, t);
+	}
+	
+	public static void removeUTXOfromDB(String s){
+		database.removeUTXO(s);
+	}
+	
+	public static void addWallettoDB(Wallet w, User u){
+		database.addWallet(w, u);
 	}
 }

@@ -74,14 +74,14 @@ public class Server implements Runnable {
 		Wallet sender = null;
 		PublicKey recipient = null;
 		
-		for(Wallet w : Cryptocoin.wallets) {
+		for(Wallet w : Cryptocoin.getDatabase().getWallets()) {
 			if(w.getPublicKeyString().equals(sender_publicKey)) {
 				sender = w;
 				break;
 			}
 		}
 		
-		for(Wallet w : Cryptocoin.wallets) {
+		for(Wallet w : Cryptocoin.getDatabase().getWallets()) {
 			if(w.getPublicKeyString().equals(recipient_publicKey)) {
 				recipient = w.publicKey;
 				break;

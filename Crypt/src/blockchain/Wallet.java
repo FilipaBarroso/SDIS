@@ -21,17 +21,18 @@ public class Wallet {
 	public PublicKey publicKey;
 	public User owner;
 	
+
 	// contains all unspent outputs from this wallet aka its balance
 	public HashMap<String,TransactionOutput> WalletUTXOs = new HashMap<String,TransactionOutput>();
 	
 	// this constructor should never be used
-	public Wallet() {
+	/*public Wallet() {
 		// generate hashes
 		generateKeys();
 		
 		// add this wallet to the list of existing wallets
 		Cryptocoin.wallets.add(this);
-	}
+	}*/
 	
 	public Wallet(String username) {
 		// generate hashes
@@ -41,7 +42,15 @@ public class Wallet {
 		owner.addWallet(this);
 		
 		// add this wallet to the list of existing wallets
-		Cryptocoin.wallets.add(this);
+		Cryptocoin.addWallettoDB(this, owner);
+	}
+	
+	public User getOwner() {
+		return owner;
+	}
+
+	public void setOwner(User owner) {
+		this.owner = owner;
 	}
 	
 	public boolean belongsTo(String user_name) {
@@ -81,7 +90,7 @@ public class Wallet {
 	public float getBalance() {
 		float total = 0;
 		
-		for(Map.Entry<String, TransactionOutput> item : Cryptocoin.UTXOs.entrySet()) {
+		for(Map.Entry<String, TransactionOutput> item : Cryptocoin.getDatabase().getUTXOs().entrySet()) {
 			TransactionOutput UTXO = item.getValue();
 			// add unspent outputs to this wallet
 			if(UTXO.belongsTo(publicKey)) {

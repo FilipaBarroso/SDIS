@@ -26,16 +26,16 @@ public class Chain {
 		// adds an empty block so the chain isn't empty
 		genesis_block = new Block("0");
 
-		bank = new Wallet();
-		Wallet genesisWallet = new Wallet();
+		bank = new Wallet("blank");
+		Wallet genesisWallet = new Wallet("genesis");
 		
 		// create genesis transaction, which fills the bank up 
 		genesisTransaction = new Transaction(genesisWallet.publicKey, bank.publicKey, bankFunds, null);
 		genesisTransaction.generateSignature(genesisWallet.privateKey);	 //manually sign the genesis transaction	
 		genesisTransaction.id = "0"; //manually set the transaction id
 		genesisTransaction.outputs.add(new TransactionOutput(genesisTransaction.recipient, genesisTransaction.value, genesisTransaction.id)); //manually add the Transactions Output
-		Cryptocoin.UTXOs.put(genesisTransaction.outputs.get(0).id, genesisTransaction.outputs.get(0)); //its important to store our first transaction in the UTXOs list.
-
+		Cryptocoin.addUTXOtoDB(genesisTransaction.outputs.get(0).id, genesisTransaction.outputs.get(0)); //its important to store our first transaction in the UTXOs list.
+		
 		genesis_block.addTransaction(genesisTransaction);
 		blockchain.add(genesis_block);
 		currentBlock = new Block(genesis_block.previousHash);
@@ -52,7 +52,7 @@ public class Chain {
 	// have all existing users mining the block TODO seperately
 	// whoever mines it first gets a reward
 	public void add(Block b) {
-		for(Wallet w : Cryptocoin.wallets) {
+		for(Wallet w : Cryptocoin.getDatabase().getWallets()) {
 			// TODO call this in a thread
 			w.mine(b);
 		}
