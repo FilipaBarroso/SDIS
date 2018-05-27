@@ -61,7 +61,7 @@ public class User implements Runnable{
 			PublicKey recipient = null;
 			key = (String)cin.readLine();
 			
-			for(Wallet w : Cryptocoin.getDatabase().getWallets()) {
+			for(Wallet w : Cryptocoin.wallets) {
 				if(w.getPublicKeyString().equals(key)) {
 					recipient = w.publicKey;
 					continue;
