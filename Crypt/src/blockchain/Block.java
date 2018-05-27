@@ -35,31 +35,33 @@ public class Block {
 			hash = calculateHash();
 			if(mined) break;
 		}
-		
+
 		if(!mined) {
 			mined = true;
-			Chain.giveMiningReward(w, hash);
+			Cryptocoin.getBlockchain().giveMiningReward(w, hash);
 		}
-		
+
 		System.out.println("Block mined with the hash: " + hash);
 	}
-	
+
 	public boolean addTransaction(Transaction trans) {
 		if(trans == null) return false;
-		
-		if(previousHash != "0")
-			if(!trans.processTransaction()) 
+
+		//if(hash != "0")
+			if(!trans.processTransaction())
 				return false;
-		
+
 		transaction_list.add(trans);
-		
+
+		System.out.println("Current block has " + transaction_list.size() + " transactions stored\n");
+
 		// each block gets added to the chain to be mined after 3 transactions
 		if(transaction_list.size() >= 3)
-			Cryptocoin.getBlockchain().add(this);
-		
+			Cryptocoin.getBlockchain().addCurrentBlock();
+
 		return true;
 	}
-	
+
 	public String calculateHash() {
 		return Cryptocoin.sha256(
 				previousHash +
