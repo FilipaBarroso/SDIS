@@ -45,7 +45,7 @@ public class Cryptocoin {
 		server_address = InetAddress.getByName(server_name);
 
 		/* ------------------------------------------------*/
-		/*
+
 		if(args.length < 1) {
 			blockchain = new Chain();
 			server = new Server(server_address, server_port);
@@ -56,6 +56,7 @@ public class Cryptocoin {
 		// if the user with user_name arg doesn't belong to an existing wallet, create new one and thread(user).start()
 		// if it exists, thread(wallet.owner).start()
 		else if(args.length == 1) {
+			blockchain = new Chain();
 			User u = null;
 
 			for(Wallet w : wallets) {
@@ -67,13 +68,16 @@ public class Cryptocoin {
 			if(u == null) {
 				Wallet u_wallet = new Wallet(args[0]);
 				u = u_wallet.owner;
+
 			}
 
+			Wallet test_wallet = new Wallet("test");
 			new Thread(u).start();
 		}
-		*/
+
 
 		/* debugging, without the if conditions */
+		/*
 		Wallet walletA = new Wallet("userA");
 		Wallet walletB = new Wallet("userB");
 
@@ -96,7 +100,7 @@ public class Cryptocoin {
 		blockchain.currentBlock.addTransaction(walletB.sendFunds( walletA.publicKey, 20));
 		System.out.println("\nuserA's balance is: " + walletA.getBalance());
 		System.out.println("userB's balance is: " + walletB.getBalance());
-
+		*/
 	}
 
 	public static String getMerkleRoot(ArrayList<Transaction> transactions) {
