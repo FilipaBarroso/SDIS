@@ -53,10 +53,38 @@ public class Chain {
 		Chain.blockchain = blockchain;
 	}
 
+	public int getStake() {
+		int stake = 0;
+		for(Wallet w : Cryptocoin.getDatabase().getWallets()) {
+			stake += w.getBalance();
+		}
+
+		//System.out.println("Stake is " + stake);
+
+		return stake;
+	}
+
+	public Wallet getStakeWinner(int n) {
+		Wallet winner = null;
+		int i;
+
+		if(n < Cryptocoin.getDatabase().getWallets().get(0).getBalance())
+			return Cryptocoin.getDatabase().getWallets().get(0);
+
+		for(i = 1; i < Cryptocoin.getDatabase().getWallets().size(); i++) {
+			if(n >= Cryptocoin.getDatabase().getWallets().get(i-1).getBalance())
+				if(n <= Cryptocoin.getDatabase().getWallets().get(i).getBalance())
+					return Cryptocoin.getDatabase().getWallets().get(i);
+		}
+
+		return winner;
+	}
+
 	public void addCurrentBlock() {
 		String mined_hash = currentBlock.mineBlock();
-		int n = rand.nextInt(Cryptocoin.getDatabase().getWallets().size());
-		Wallet winner = Cryptocoin.getDatabase().getWallets().get(n);
+		int n = rand.nextInt(getStake());
+		//System.out.println("Rand is " + n);
+		Wallet winner = getStakeWinner(n);
 		giveMiningReward(winner, mined_hash);
 
 		Chain.blockchain.add(currentBlock);

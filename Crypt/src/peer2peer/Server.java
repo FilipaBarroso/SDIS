@@ -128,7 +128,7 @@ public class Server implements Runnable {
 					break;
 				}
 			}
-
+			
 			if(!user_exists) {
 				Cryptocoin.getDatabase().updateUserPort(msg.getPort()+1);
 				Wallet new_w = new Wallet(msgTokens[1], msg.getPort());
