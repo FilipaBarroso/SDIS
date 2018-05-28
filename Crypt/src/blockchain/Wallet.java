@@ -64,11 +64,6 @@ public boolean belongsTo(String user_name) {
 	return owner.username.equals(user_name);
 }
 
-public void mine(Block b) {
-	if(b.mineBlock(this))
-	System.out.println(this.toString() + " got the mining reward of "+ Cryptocoin.getBlockchain().miningReward);
-}
-
 public Transaction sendFunds(PublicKey recipient, float value) {
 	if(getBalance() < value) {
 		System.out.println("WALLET ERROR: Trying to send " + value + " out of " + getBalance() + ". Insuficient funds for " + owner.username);

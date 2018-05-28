@@ -26,7 +26,7 @@ public class Block {
 		mined = false;
 	}
 
-	public boolean mineBlock(Wallet w) {
+	public String mineBlock() {
 		merkleRoot = Cryptocoin.getMerkleRoot(transaction_list);
 		String target = new String(new char[Cryptocoin.miningDifficulty]).replace('\0', '0');
 
@@ -38,13 +38,7 @@ public class Block {
 
 		System.out.println("Block mined with the hash: " + hash + "\n");
 
-		if(!mined) {
-			mined = true;
-			Cryptocoin.getBlockchain().giveMiningReward(w, hash);
-			return true;
-		}
-
-		return false;
+		return hash;
 	}
 
 	public boolean addTransaction(Transaction trans) {

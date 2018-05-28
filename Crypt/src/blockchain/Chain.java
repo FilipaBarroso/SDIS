@@ -13,6 +13,7 @@ import com.google.gson.*;
 public class Chain {
 
 	private static ArrayList<Block> blockchain;
+	private Random rand = new Random();
 	public static Transaction genesisTransaction;
 	public static Block genesis_block;
 	public static Wallet bank, genesisWallet;
@@ -52,14 +53,11 @@ public class Chain {
 		Chain.blockchain = blockchain;
 	}
 
-	// have all existing users mining the block TODO seperately
-	// whoever mines it first gets a reward
 	public void addCurrentBlock() {
-		for(Wallet w : Cryptocoin.getDatabase().getWallets()) {
-			// TODO call this in a thread
-			w.mine(currentBlock);
-			break; // TODO not have a break
-		}
+		String mined_hash = currentBlock.mineBlock();
+		int n = rand.nextInt(Cryptocoin.getDatabase().getWallets().size());
+		Wallet winner = Cryptocoin.getDatabase().getWallets().get(n);
+		giveMiningReward(winner, mined_hash);
 
 		Chain.blockchain.add(currentBlock);
 		currentBlock = tmpRewardBlock;
@@ -67,14 +65,14 @@ public class Chain {
 		System.out.println("Added block to blockchain\n");
 
 		if(!isChainValid()) {
-			System.out.println("ERROR: chain invalid\n");
+			System.out.println("ERROR: chain invalid .. removing block\n");
 			blockchain.remove(currentBlock);
 		}
 	}
 
 	public void giveMiningReward(Wallet w, String prevHash) {
 		// create a new block, to store this new reward transactionUTXO
-		System.out.println("Giving mining");
+		System.out.println("Giving mining reward of " + miningReward + " to " + w.owner.username);
 		tmpRewardBlock = new Block(prevHash);
 		tmpRewardBlock.addTransaction(bank.sendFunds(w.publicKey, miningReward));
 	}
