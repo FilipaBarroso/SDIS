@@ -30,7 +30,7 @@ public class User implements Runnable, Serializable {
 	public transient static int MAX_BUFFER = 65000;
 	private transient MulticastSocket socket;
 	private transient DatagramPacket server_packet;
-	private int user_port;
+	public int user_port;
 
 	public User(String username, int user_port) {
 		this.user_port = user_port;

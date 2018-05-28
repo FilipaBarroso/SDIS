@@ -63,7 +63,14 @@ public class Cryptocoin {
 		}
 
 		else if(args.length == 1) {
-			Wallet u_wallet = new Wallet(args[0], database.getUserPort());
+			int up = 0;
+			for(Wallet ws : database.getWallets()) {
+				if(ws.owner.username.equals(args[0]))
+					up = ws.owner.user_port;
+			}
+			if(up == 0) up = database.getUserPort();
+			
+			Wallet u_wallet = new Wallet(args[0], up);
 			new Thread(u_wallet.owner).start();
 		}
 

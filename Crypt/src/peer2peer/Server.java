@@ -124,7 +124,7 @@ public class Server implements Runnable {
 			for(Wallet w : Cryptocoin.getDatabase().getWallets()) {
 				if(w.owner.username.equals(msgTokens[1])) {
 					user_exists = true;
-					System.out.println("Returning user");
+					System.out.println("Returning user with port " + w.owner.user_port);
 					break;
 				}
 			}
