@@ -130,8 +130,8 @@ public class User implements Runnable, Serializable {
 
 		if(server_msg.equals("R"))
 			System.out.println("\nUser does not exist");
-		else if(server_msg.equals("UF"))
-			System.out.println("\nUnsuficient funds");
+		else if(server_msg.equals("IF"))
+			System.out.println("\nInsufficient funds");
 		else
 			System.out.println("\n" + username + " has " + server_msg + " coins");
 	}

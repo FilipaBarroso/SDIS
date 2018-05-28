@@ -99,8 +99,8 @@ public class Server implements Runnable {
 				}
 				else {
 					if(sender.getBalance() < value) {
-						System.out.println("Unsuficient funds");
-						b = "UF";
+						System.out.println("Insufficient funds");
+						b = "IF";
 					}
 					else {
 						Transaction t = sender.sendFunds(recipientPublicKey, value);
@@ -128,7 +128,7 @@ public class Server implements Runnable {
 					break;
 				}
 			}
-			
+
 			if(!user_exists) {
 				Cryptocoin.getDatabase().updateUserPort(msg.getPort()+1);
 				Wallet new_w = new Wallet(msgTokens[1], msg.getPort());

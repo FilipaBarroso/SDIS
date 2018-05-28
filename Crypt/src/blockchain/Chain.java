@@ -71,7 +71,7 @@ public class Chain {
 		if(n < Cryptocoin.getDatabase().getWallets().get(0).getBalance())
 			return Cryptocoin.getDatabase().getWallets().get(0);
 
-		for(i = 1; i < Cryptocoin.getDatabase().getWallets().size(); i++) {
+		for(i = 1; i <= Cryptocoin.getDatabase().getWallets().size(); i++) {
 			if(n >= Cryptocoin.getDatabase().getWallets().get(i-1).getBalance())
 				if(n <= Cryptocoin.getDatabase().getWallets().get(i).getBalance())
 					return Cryptocoin.getDatabase().getWallets().get(i);

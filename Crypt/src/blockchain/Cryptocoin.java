@@ -69,7 +69,7 @@ public class Cryptocoin {
 					up = ws.owner.user_port;
 			}
 			if(up == 0) up = database.getUserPort();
-			
+
 			Wallet u_wallet = new Wallet(args[0], up);
 			new Thread(u_wallet.owner).start();
 		}
@@ -139,7 +139,6 @@ public class Cryptocoin {
 			e.printStackTrace();
 		}
 	}
-
 
 	public static String getMerkleRoot(ArrayList<Transaction> transactions) {
 		int count = transactions.size();

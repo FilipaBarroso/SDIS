@@ -17,13 +17,11 @@ public class Block {
 	public ArrayList<Transaction> transaction_list = new ArrayList<Transaction>();
 	private long timestamp;
 	public int nonce = 0;
-	public boolean mined;
 
 	public Block(String prevHash) {
 		this.previousHash = prevHash;
 		this.setTimestamp(new Date().getTime());
 		this.hash = calculateHash();
-		mined = false;
 	}
 
 	public String mineBlock() {
@@ -33,7 +31,6 @@ public class Block {
 		while(!hash.substring(0, Cryptocoin.miningDifficulty).equals(target)) {
 			nonce++;
 			hash = calculateHash();
-			if(mined) break;
 		}
 
 		System.out.println("Block mined with the hash: " + hash + "\n");
