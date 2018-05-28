@@ -32,10 +32,6 @@ public class Cryptocoin {
 	public static int miningDifficulty = 4;
 	public static int minimunTransactionAmount = 1;
 
-	//list of all unspent transactions outputs TODO save this in a database
-	//public static HashMap<String,TransactionOutput> UTXOs = new HashMap<String,TransactionOutput>();
-	//public static ArrayList<Wallet> wallets = new ArrayList<Wallet>();
-
 	private static Database database;
 	private static final String DATABASE_STRING = "../database.data";
 	private static File db;

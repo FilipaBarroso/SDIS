@@ -17,9 +17,9 @@ import blockchain.Wallet;
 import java.io.Serializable;
 
 /*
- * connect to multicast channel thread
- * ask for user input regarding transactions, checking wallet balance etc..
- */
+* connect to multicast channel thread
+* ask for user input regarding transactions, checking wallet balance etc..
+*/
 public class User implements Runnable, Serializable {
 
 	private static final long serialVersionUID = 3L;
@@ -34,7 +34,7 @@ public class User implements Runnable, Serializable {
 
 	public User(String username, int user_port) {
 		this.user_port = user_port;
-		System.out.println("User port = " + user_port);
+		System.out.println("New user has the port " + user_port);
 		this.username = username;
 		cin = new BufferedReader(new InputStreamReader(System.in));
 		this.buffer = new byte[MAX_BUFFER];
@@ -60,10 +60,10 @@ public class User implements Runnable, Serializable {
 		while(true) {
 			try {
 				System.out.println("\n-------------------"
-						+ "\nSend funds(1)"
-						+ "\nCheck balance(2)"
-						+ "\n-------------------"
-						+ "\nPick an Option: ");
+				+ "\nSend funds(1)"
+				+ "\nCheck balance(2)"
+				+ "\n-------------------"
+				+ "\nPick an Option: ");
 
 				String s;
 				s = (String)cin.readLine();
@@ -80,12 +80,12 @@ public class User implements Runnable, Serializable {
 
 	public void handleLogin() {
 		try {
-		String s = "LOGIN "
-				+ username;
+			String s = "LOGIN "
+			+ username;
 
-		byte[] msg = s.getBytes();
-		DatagramPacket packet = new DatagramPacket(msg, msg.length, Cryptocoin.server_address, Cryptocoin.server_port);
-		socket.send(packet);
+			byte[] msg = s.getBytes();
+			DatagramPacket packet = new DatagramPacket(msg, msg.length, Cryptocoin.server_address, Cryptocoin.server_port);
+			socket.send(packet);
 		}
 		catch (Exception e) {
 
@@ -95,7 +95,7 @@ public class User implements Runnable, Serializable {
 	public void handleSendFunds() {
 		try {
 			System.out.println("\n-----------------------------------------"
-					+ "\nWrite the name of the user to send coins to:");
+			+ "\nWrite the name of the user to send coins to:");
 			String recipient_username;
 			PublicKey recipientPublicKey = null;
 			recipient_username = (String)cin.readLine();
@@ -115,33 +115,37 @@ public class User implements Runnable, Serializable {
 	// the server should do all the checking and reply accordingly
 	public void sendMsg(String recipient_username, Float value) throws Exception {
 		String s = "SEND "
-				+ recipient_username + " "
-				+ value + " "
-				+ username;
+		+ recipient_username + " "
+		+ value + " "
+		+ username;
 
 		byte[] msg = s.getBytes();
 		DatagramPacket packet = new DatagramPacket(msg, msg.length, Cryptocoin.server_address, Cryptocoin.server_port);
 		socket.send(packet);
 
-		Thread.sleep(2000);
-
-		// TODO interpret error messages
+		Thread.sleep(1000);
 
 		socket.receive(server_packet);
-		String balance = new String(server_packet.getData(), 0, server_packet.getLength());
-		System.out.println("\n" + username + " has " + balance + " coins");
+		String server_msg = new String(server_packet.getData(), 0, server_packet.getLength());
+
+		if(server_msg.equals("R"))
+			System.out.println("\nUser does not exist");
+		else if(server_msg.equals("UF"))
+			System.out.println("\nUnsuficient funds");
+		else
+			System.out.println("\n" + username + " has " + server_msg + " coins");
 	}
 
 	public void handleCheckBalance() {
 		try {
-		String s = "BALANCE "
-							+ username;
+			String s = "BALANCE "
+			+ username;
 
-		byte[] msg = s.getBytes();
-		DatagramPacket packet = new DatagramPacket(msg, msg.length, Cryptocoin.server_address, Cryptocoin.server_port);
-		socket.send(packet);
+			byte[] msg = s.getBytes();
+			DatagramPacket packet = new DatagramPacket(msg, msg.length, Cryptocoin.server_address, Cryptocoin.server_port);
+			socket.send(packet);
 
-		Thread.sleep(2000);
+			Thread.sleep(1000);
 
 			socket.receive(server_packet);
 			String balance = new String(server_packet.getData(), 0, server_packet.getLength());
