@@ -45,7 +45,7 @@
 
 			@Override
 			public void run() {
-				System.out.println("Server online ..");
+				System.out.println("Server online ..\n");
 
 				while(true) {
 					try {
@@ -91,11 +91,12 @@
 				Cryptocoin.getBlockchain().currentBlock.addTransaction(t);
 
 				try {
-					String b = Float.toString(sender.getBalance());
+				String b = Float.toString(sender.getBalance());
 				byte[] buf = b.getBytes();
 				int user_port = msg.getPort();
 				DatagramPacket new_packet = new DatagramPacket(buf, buf.length, Cryptocoin.server_address, user_port);
 				socket.send(new_packet);
+
 			}
 			catch (Exception e) {
 				e.printStackTrace();
@@ -107,12 +108,18 @@
 					for(Wallet w : Cryptocoin.getDatabase().getWallets()) {
 						if(w.owner.username.equals(msgTokens[1])) {
 							user_exists = true;
+							System.out.println("Returning user");
 							break;
 						}
 					}
-						if(!user_exists) {
-							Wallet new_wallet = new Wallet(msgTokens[1]);
-						}
+
+					if(!user_exists) {
+						Cryptocoin.getDatabase().updateUserPort(msg.getPort()+1);
+						Wallet new_w = new Wallet(msgTokens[1], msg.getPort());
+						Cryptocoin.getBlockchain().currentBlock.addTransaction(Cryptocoin.getBlockchain().bank.sendFunds(new_w.publicKey, 100f));
+						Cryptocoin.addWallettoDB(new_w);
+					}
+
 						System.out.println(msgTokens[1] + " has logged in");
 				}
 
@@ -124,8 +131,10 @@
 
 							try {
 							int user_port = msg.getPort();
+							System.out.println("Sending to " + user_port + " balance = " + b);
 							DatagramPacket new_packet = new DatagramPacket(buf, buf.length, Cryptocoin.server_address, user_port);
 							socket.send(new_packet);
+
 						}
 						catch (Exception e) {
 							e.printStackTrace();

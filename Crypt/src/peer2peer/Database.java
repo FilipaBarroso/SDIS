@@ -9,6 +9,7 @@ import java.util.Random;
 
 import blockchain.TransactionOutput;
 import blockchain.Wallet;
+import blockchain.Cryptocoin;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -26,12 +27,12 @@ public class Database implements Serializable {
 	//volatile to guarantee visibility across threads
 	private volatile HashMap<String,TransactionOutput> UTXOs;
 	private volatile ArrayList<Wallet> wallets;
-	private volatile int user_port = 8001;
+	private volatile int user_port;
 
 	public Database(){
 		setUTXOs(new HashMap<String,TransactionOutput>());
 		setWallets(new ArrayList<Wallet>());
-
+		user_port = 8001;
 	}
 
 	/*
@@ -41,8 +42,9 @@ public class Database implements Serializable {
 		 return user_port;
 	 }
 
-	 public synchronized void updateUserPort() {
-		 user_port++;
+	 public synchronized void updateUserPort(int p) {
+		 this.user_port = p;
+		 Cryptocoin.saveDatabase();
 	 }
 
 	/*
@@ -54,15 +56,17 @@ public class Database implements Serializable {
 
 	public synchronized void setWallets(ArrayList<Wallet> wallets) {
 		this.wallets = wallets;
+		Cryptocoin.saveDatabase();
 	}
 
 	public synchronized void addWallet(Wallet wallet){
 			wallets.add(wallet);
+			Cryptocoin.saveDatabase();
 	}
 
 	public synchronized boolean userHasWallet(User user){
 		for(int i=0; i < wallets.size(); i++){
-			if(wallets.get(i).owner == user)
+			if(wallets.get(i).owner.username.equals(user.username))
 				return true;
 		}
 		return false;
@@ -77,13 +81,16 @@ public class Database implements Serializable {
 
 	public synchronized void setUTXOs(HashMap<String, TransactionOutput> UTXOs) {
 		this.UTXOs = UTXOs;
+		Cryptocoin.saveDatabase();
 	}
 
 	public synchronized void addUTXOs(String string, TransactionOutput tOut){
 		UTXOs.put(string, tOut);
+		Cryptocoin.saveDatabase();
 	}
 
 	public synchronized void removeUTXO(String string){
 		UTXOs.remove(string);
+		Cryptocoin.saveDatabase();
 	}
 }

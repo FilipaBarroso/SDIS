@@ -17,6 +17,13 @@ import java.util.HashMap;
 import org.bouncycastle.*;
 import com.google.gson.GsonBuilder;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+
 import peer2peer.*;
 
 public class Cryptocoin {
@@ -26,10 +33,12 @@ public class Cryptocoin {
 	public static int minimunTransactionAmount = 1;
 
 	//list of all unspent transactions outputs TODO save this in a database
-	public static HashMap<String,TransactionOutput> UTXOs = new HashMap<String,TransactionOutput>();
-	public static ArrayList<Wallet> wallets = new ArrayList<Wallet>();
+	//public static HashMap<String,TransactionOutput> UTXOs = new HashMap<String,TransactionOutput>();
+	//public static ArrayList<Wallet> wallets = new ArrayList<Wallet>();
 
-	private static Database database = new Database();
+	private static Database database;
+	private static final String DATABASE_STRING = "../database.data";
+	private static File db;
 
 	// server related variables
 	public static InetAddress server_address;
@@ -41,7 +50,11 @@ public class Cryptocoin {
 
 		Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
 
-		// load database
+		db = new File(DATABASE_STRING);
+		if(!db.exists())
+			createDatabase();
+		else
+			loadDatabase();
 
 		server_address = InetAddress.getByName(server_name);
 
@@ -50,15 +63,12 @@ public class Cryptocoin {
 		if(args.length < 1) {
 			blockchain = new Chain();
 			server = new Server(server_address, server_port);
-
-			Wallet test_wallet = new Wallet("test");
 			new Thread(server).start();
 		}
 
 		else if(args.length == 1) {
-			User u = new User(args[0], database.getUserPort());
-			database.updateUserPort();
-			new Thread(u).start();
+			Wallet u_wallet = new Wallet(args[0], database.getUserPort());
+			new Thread(u_wallet.owner).start();
 		}
 
 
@@ -88,6 +98,45 @@ public class Cryptocoin {
 		System.out.println("userB's balance is: " + walletB.getBalance());
 		*/
 	}
+
+	private static void createDatabase(){
+		database = new Database();
+
+		saveDatabase();
+	}
+
+	public static Database getDatabase() {
+		return database;
+	}
+
+	public static void saveDatabase(){
+		try{
+			FileOutputStream fileOutputStream = new FileOutputStream(DATABASE_STRING);
+			ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
+
+			objectOutputStream.writeObject(database);
+
+			objectOutputStream.close();
+
+		} catch (Exception e){
+			e.printStackTrace();
+		}
+	}
+
+	public static void loadDatabase() {
+		try{
+			System.out.println("Loading database");
+			FileInputStream fileInputStream = new FileInputStream(DATABASE_STRING);
+			ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
+
+			database = (Database) objectInputStream.readObject();
+
+			objectInputStream.close();
+		} catch(Exception e){
+			e.printStackTrace();
+		}
+	}
+
 
 	public static String getMerkleRoot(ArrayList<Transaction> transactions) {
 		int count = transactions.size();
@@ -166,10 +215,6 @@ public class Cryptocoin {
 		return null;
 	}
 
-	public static Database getDatabase() {
-		return database;
-	}
-
 	public static void addUTXOtoDB(String s, TransactionOutput t){
 		database.addUTXOs(s, t);
 	}
@@ -179,6 +224,9 @@ public class Cryptocoin {
 	}
 
 	public static void addWallettoDB(Wallet w){
+		for(Wallet wall : database.getWallets()) {
+			if(wall.owner.username.equals(w.owner.username)) return;
+		}
 		database.addWallet(w);
 	}
 }

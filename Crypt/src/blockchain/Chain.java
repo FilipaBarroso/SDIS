@@ -15,7 +15,7 @@ public class Chain {
 	private static ArrayList<Block> blockchain;
 	public static Transaction genesisTransaction;
 	public static Block genesis_block;
-	public static Wallet bank;
+	public static Wallet bank, genesisWallet;
 	public static float miningReward = (float)(Cryptocoin.miningDifficulty); // the reward is the same value as the difficultry
 	public static float bankFunds = 1000000000f;
 	public Block currentBlock; // this block is always the one next to be added. It's created after the current one is mined and added to the chain
@@ -27,8 +27,8 @@ public class Chain {
 		// adds an empty block so the chain isn't empty
 		genesis_block = new Block("0");
 
-		bank = new Wallet("bank");
-		Wallet genesisWallet = new Wallet("genesis");
+		genesisWallet = new Wallet("genesis", 0);
+		bank = new Wallet("bank", 1);
 
 		// create genesis transaction, which fills the bank up
 		genesisTransaction = new Transaction(genesisWallet.publicKey, bank.publicKey, bankFunds, null);
@@ -36,6 +36,7 @@ public class Chain {
 		genesisTransaction.id = "0"; //manually set the transaction id
 		genesisTransaction.outputs.add(new TransactionOutput(genesisTransaction.recipient, genesisTransaction.value, genesisTransaction.id)); //manually add the Transactions Output
 		Cryptocoin.addUTXOtoDB(genesisTransaction.outputs.get(0).id, genesisTransaction.outputs.get(0)); //its important to store our first transaction in the UTXOs list.
+		System.out.println("Bank funds = " + bank.getBalance());
 
 		genesis_block.addTransaction(genesisTransaction);
 		blockchain.add(genesis_block);
