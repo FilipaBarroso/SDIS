@@ -1,1 +1,1 @@
-CHECK README.TXT IN PROJ/
+Actual project held in the folder Final
